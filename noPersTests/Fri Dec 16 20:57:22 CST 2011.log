@@ -1,0 +1,12 @@
+g++ phashmap.o main.cxx -o HashTable
+./HashTable
+Testing live data...    
+Testing insertion...      PASSED
+Testing retrieval...      PASSED
+Testing removal...        PASSED
+Inserted: 100000000
+Removed: 100000000
+Removal Time: 156220.000000
+Retrieval time: 1266190.000000
+Insertion Time: 1247240.000000
+Alloc Time: 87170.000000
