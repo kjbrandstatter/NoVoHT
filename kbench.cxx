@@ -24,14 +24,12 @@ void testInsert(){
    fflush(stdout);
    FILE *paths;
    paths = fopen("test.data", "r") ;
-   //paths = fopen("/home/kevin/Library.pla","r");
    if (paths == NULL){
       printf("File open failure\n");
       return;
    }
    int n =NUMEL;
    clock_t a=clock();
-   //phashmap map ((char *) "hash.table", size);
    phashmap *map = new phashmap((char *) "hash.table", size, 10000, 2/3);
    char ** list = (char **) calloc(n, sizeof(char*));
    char f[300];
