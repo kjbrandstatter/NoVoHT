@@ -1,25 +1,26 @@
 #ifndef PHASHMAP_H
 #define PHASHMAP_H
 #include "phashmap.h"
-#include <string.h>
+#include <string>
 #include <stdio.h>
+using namespace std;
 
-struct pair{
-   struct pair * next;
-   char* key;
-   char* val;
+struct kvpair{
+   struct kvpair * next;
+   string key;
+   string val;
    //int val;
    fpos_t pos;
 };
 
 class phashmap{
    int size;
-   pair** pairs;
+   kvpair** kvpairs;
    int numEl;
-   char * file;
+   string file;
    int nRem;
    void resize(int ns);
-   int write(pair *);
+   int write(kvpair *);
    //void writeFile();
    void readFile();
    int mark(fpos_t);
@@ -29,19 +30,19 @@ class phashmap{
         phashmap();
         //phashmap(int);
         //phashmap(char *);
-        phashmap(char *, int, int);
-        phashmap(char *, int, int, float);
+        phashmap(string, int, int);
+        phashmap(string, int, int, float);
         //phashmap(char *, phashmap*);
         ~phashmap();
         int writeFile();
-        int put(char*, char*);
-        char* get(char*);
-        int remove(char*);
+        int put(string,  string);
+        string get(string);
+        int remove(string);
         int getSize() {return numEl;}
         int getCap() {return size;}
 };
 
-unsigned long long hash (char* k);
+unsigned long long hash (string k);
 
-void fsu(pair *);
+void fsu(kvpair *);
 #endif

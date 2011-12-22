@@ -40,14 +40,13 @@ int main(int argc, char * argv[]){
 
 	int num = atoi(argv[1]);
 	string fileName = "hashmap.data";
-	phashmap map = phashmap((char *)fileName.c_str(), 100000, 1000, 0.7);
+	phashmap map = phashmap(fileName, 100000, 1000, 0.7);
 	int keyLen = 32;
 	int valueLen = 96;
 	for(int i=0; i<num; i++){
 		string key = randomString(keyLen);
 		string value = randomString(valueLen);
-		map.put((char*)key.c_str(), (char *)value.c_str());
-        printf("completes");
+		map.put(key, value);
 	}
 	return 0;
 }

@@ -7,32 +7,31 @@
 #include "phashmap.h"
 
 phashmap::phashmap(){
-   pairs = new pair*[1000];
+   kvpairs = new kvpair*[1000];
    size = 1000;
    numEl = 0;
-   file = NULL;
    magicNumber = 1000;
    resizeNum = -1;
 }
 
 /*
 phashmap::phashmap(int s){
-   pairs = new pair*[s];
+   kvpairs = new kvpair*[s];
    size = s;
    numEl=0;
    file = NULL;
 }
 
 phashmap::phashmap(char * f){
-   pairs = new pair*[1000];
+   kvpairs = new kvpair*[1000];
    size = 1000;
    numEl=0;
    file = f;
    readFile();
 }
 */
-phashmap::phashmap(char * f,int s, int m){
-   pairs = new pair*[s];
+phashmap::phashmap(string f,int s, int m){
+   kvpairs = new kvpair*[s];
    magicNumber = m;
    nRem = 0;
    resizeNum = 0;
@@ -41,8 +40,8 @@ phashmap::phashmap(char * f,int s, int m){
    file = f;
    readFile();
 }
-phashmap::phashmap(char * f,int s, int m, float r){
-   pairs = new pair*[s];
+phashmap::phashmap(string f,int s, int m, float r){
+   kvpairs = new kvpair*[s];
    magicNumber = m;
    nRem = 0;
    resizeNum = r;
@@ -53,7 +52,7 @@ phashmap::phashmap(char * f,int s, int m, float r){
 }
 /*
 phashmap::phashmap(char * f, phashmap *map){
-   pairs = new pair*[1000];
+   kvpairs = new kvpair*[1000];
    size = 1000;
    numEl=0;
    file = f;
@@ -62,12 +61,12 @@ phashmap::phashmap(char * f, phashmap *map){
 phashmap::~phashmap(){
    writeFile();
    for (int i = 0; i < size; i++){
-      fsu(pairs[i]);
+      fsu(kvpairs[i]);
    }
 }
 
 //0 success, -1 no insert, -2 no write
-int phashmap::put(char* k, char* v){
+int phashmap::put(string k, string v){
    if (numEl >= size*resizeNum) {
       if (resizeNum !=0){
          resize(size*2);
@@ -75,53 +74,47 @@ int phashmap::put(char* k, char* v){
    }
    int slot;
    slot = hash(k)%size;
-   if (slot < 0)
-      slot = 0-slot;
-   pair *cur = pairs[slot];
-   pair *add = new pair;
+   kvpair *cur = kvpairs[slot];
+   kvpair *add = new kvpair;
    add->key = k;
    add->val = v;
    add->next = NULL;
    if (cur == NULL){
-      pairs[slot] = add;
+      kvpairs[slot] = add;
       numEl++;
       return write(add);
    }
    while (cur->next != NULL){
-      if (strcmp(k, cur->key) == 0) {return -1;}
+      if (k.compare(cur->key) == 0) {return -1;}
       cur = cur->next;
    }
-   if (strcmp(k, cur->key) == 0) {return -1;}
+   if (k.compare(cur->key) == 0) {return -1;}
    cur->next = add;
    numEl++;
    return write(add);
 }
 
-char* phashmap::get(char* k){
+string phashmap::get(string k){
    int loc = hash(k)%size;
-   if (loc < 0)
-      loc = 0-loc;
-   pair *cur = pairs[loc];
+   kvpair *cur = kvpairs[loc];
    while (cur != NULL){
-      if (strcmp(cur->key, k) == 0) return cur->val;
+      if (k.compare(cur->key) == 0) return cur->val;
       cur = cur->next;
    }
    return NULL;
 }
 
 //return 0 for success, -1 fail to remove, -2+ write failure
-int phashmap::remove(char* k){
+int phashmap::remove(string k){
    int ret =0;
    int loc = hash(k)%size;
-   pair *cur = pairs[loc];
+   kvpair *cur = kvpairs[loc];
    if (cur == NULL) return ret-1;       //not found
-   if (strcmp(cur->key,k) ==0) {
-      fpos_t toRem = pairs[loc]->pos;
-      pairs[loc] = cur->next;
+   if (k.compare(cur->key) ==0) {
+      fpos_t toRem = kvpairs[loc]->pos;
+      kvpairs[loc] = cur->next;
       numEl--;
       ret+=mark(toRem);
-      free(cur->key);
-      free(cur->val);
       delete cur;
       nRem++;
       if (nRem == magicNumber) ret+=writeFile(); //write and save write success
@@ -129,12 +122,10 @@ int phashmap::remove(char* k){
    }
    while(cur != NULL){
       if (cur->next == NULL) return ret-1;
-      else if (strcmp(cur->next->key,k)==0){
-         pair *r = cur->next;
+      else if (k.compare(cur->next->key)==0){
+         kvpair *r = cur->next;
          cur->next = r->next;
          ret+=mark(r->pos);              //mark and sace status code
-         free(r->key);
-         free(r->val);
          delete r;
          numEl--;
          nRem++;
@@ -150,13 +141,13 @@ int phashmap::remove(char* k){
 //write hashmap to file
 int phashmap::writeFile(){
    int ret =0;
-   FILE * out = fopen(file, "w");
+   FILE * out = fopen(file.c_str(), "w");
    if (!out)return -2;
    for (int i=0; i<size;i++){
-      pair *cur = pairs[i];
+      kvpair *cur = kvpairs[i];
       while (cur != NULL){
-         if(cur->key != NULL && cur->val)
-                fprintf(out, "%s\t%s\n", cur->key, cur->val);
+         if(cur->key.empty() && cur->val.empty())
+                fprintf(out, "%s\t%s\n", cur->key.c_str(), cur->val.c_str());
          cur = cur->next;
       }
    }
@@ -169,14 +160,14 @@ int phashmap::writeFile(){
 void phashmap::resize(int ns){
    int olds = size;
    size = ns;
-   pair** old = pairs;
-   pairs = new pair*[ns];
+   kvpair** old = kvpairs;
+   kvpairs = new kvpair*[ns];
    numEl = 0;
    for (int i=0; i<olds;i++){
-      pair *cur = old[i];
+      kvpair *cur = old[i];
       while (cur != NULL){
          put(cur->key, cur->val);
-         pair *last = cur;
+         kvpair *last = cur;
          cur = cur->next;
          delete last;
       }
@@ -185,13 +176,13 @@ void phashmap::resize(int ns){
 }
 
 //success 0 fail -2
-//write pair to file
-int phashmap::write(pair * p){
-   if(!file) return -2;
-   FILE * data = fopen(file, "a");
+//write kvpair to file
+int phashmap::write(kvpair * p){
+   if(file.empty()) return -2;
+   FILE * data = fopen(file.c_str(), "a");
    if (!data) return -2;
    fgetpos(data, &(p->pos));
-   fprintf(data, "%s\t%s\n", p->key, p->val);
+   fprintf(data, "%s\t%s\n", p->key.c_str(), p->val.c_str());
    fclose(data);
    return 0;
 }
@@ -199,8 +190,8 @@ int phashmap::write(pair * p){
 //success 0 fail -2
 //mark line in file for deletion
 int phashmap::mark(fpos_t position){
-   if(!file) return -2;
-   FILE * data = fopen(file, "r+");
+   if(file.empty()) return -2;
+   FILE * data = fopen(file.c_str(), "r+");
    if (!data) return -2;
    fsetpos(data, &position);
    fputc((int) '~', data);
@@ -209,16 +200,18 @@ int phashmap::mark(fpos_t position){
 }
 
 void phashmap::readFile(){
-   if(!file) return;
-   FILE * data = fopen(file, "r+");
+   if(file.empty()) return;
+   FILE * data = fopen(file.c_str(), "r+");
    if (!data) return;
    char s[300];
    while(fscanf(data, "%s", s) != EOF){
-      char *key = (char *)calloc(300, sizeof(char));
-      strcpy(key, s);
-      char* val = (char *)calloc(300,sizeof(char));
+     // char *key = (char *)calloc(300, sizeof(char));
+      //strcpy(key, s);
+      string key(s);
+     // char* val = (char *)calloc(300,sizeof(char));
       fscanf(data,"%s",s);
-      strcpy(val,s);
+      string val(s);
+     // strcpy(val,s);
       if (key[0] != '~'){
          put(key,val);
       }
@@ -227,16 +220,16 @@ void phashmap::readFile(){
    writeFile();
 }
 
-unsigned long long hash(char* k){ //FNV hash
+unsigned long long hash(string k){ //FNV hash
    unsigned long long x = 14695981039346656037ULL;
-   while (*k){
-      x = x ^(*k++);
+   for (unsigned int y=0;y<k.length();y++){
+      x = x ^ (k[y]);
       x = x * 1099511628211;
    }
    return (x);
 }
 
-void fsu(pair* p){
+void fsu(kvpair* p){
    if(p == NULL) return;
    fsu(p->next);
    delete p;
