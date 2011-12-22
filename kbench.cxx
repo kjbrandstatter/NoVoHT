@@ -8,7 +8,8 @@
 #include "kbench.h"
 #include "time.h"
 #define SIZE 1000000
-#define NUMEL 100000000
+#define NUMEL 10000000
+using namespace std;
 int size;
 
 int main(int argc, char *argv[]){
@@ -30,46 +31,38 @@ void testInsert(){
    }
    int n =NUMEL;
    clock_t a=clock();
-   phashmap *map = new phashmap((char *) "hash.table", size, 10000, 2/3);
-   char ** list = (char **) calloc(n, sizeof(char*));
+   phashmap *map = new phashmap("hash.table", size, 10000, 2/3);
+   std::string *list = new string[n];
    char f[300];
    int count = 0;
+   list[count] = "hello";
    while (fscanf(paths, "%s", f) != EOF){
-      list[count] = (char *)calloc(300, sizeof(char));
-      strcpy(list[count],f);
+      list[count].assign(f);
       count++;
    }
    clock_t begin=clock();
    while (count > 0){
-      //char *z;
-      //z = (char*) calloc(300,sizeof(char));
-      char* z = new char[300];
-      sprintf(z, "%d", NUMEL-count+1);
-      //strcpy(z,f);
+      char t[300];
+      sprintf(t, "%d",NUMEL-count+1);
+      string z(t);
       map->put(list[count-1],z);
-      //map.put(z,n);
       n--;
       count--;
-      //if(n%1000==0) {printf("."); fflush(stdout);}
    }
    fclose(paths);
    printf("PASSED\n");
    clock_t end=clock();
-   free(list);
    testGet(*map);
    printf("Insertion Time: %f\n", diffclock(end, begin));
    printf("Alloc Time: %f\n", diffclock(begin,a));
-   //delete map;
-   map = NULL;
-   //free (map);
 }
+
 void testGet(phashmap map){
    clock_t begin=clock();
    FILE *oth;
    printf("Testing retrieval...      ");
    fflush(stdout);
    oth = fopen("test.data", "r");
-   //oth = fopen("/home/kevin/Library.pla","r");
    if (oth == NULL){
       printf("File open failure\n");
       return;
@@ -78,9 +71,9 @@ void testGet(phashmap map){
    char f[300];
    while (fscanf(oth, "%s", f) != EOF){
       //printf("Checking %s...    ", f);
-      if (atoi(map.get(f)) != n){
+      if (atoi(map.get(f).c_str()) != n){
          printf("FAILED\n");
-         printf("%s,%s,%d\n",f,map.get(f), n);
+         //printf("%s,%s,%d\n",f,map.get(f), n);
          return;
       }
       else{
@@ -102,7 +95,6 @@ void testRemove(phashmap map){
    printf("Testing removal...        ");
    fflush(stdout);
    oth = fopen("test.data", "r");
-   //oth = fopen("/home/kevin/Library.pla","r");
    if (oth == NULL){
       printf("File open failure\n");
       return;
@@ -114,15 +106,14 @@ void testRemove(phashmap map){
       //printf("Removing %s...    ", f);
       //map.remove(f);
       if (n%1==0) {map.remove(f); /*printf(".");fflush(stdout);*/}
-      /*
-      if (map.get(f) != n){
+      if (atoi(map.get(f).c_str()) != n){
          printf("FAILED\n");
-         printf("%s,%d,%d\n",f,map.get(f), n);
+         //printf("%s,%d,%d\n",f,map.get(f), n);
          return;
       }
       else{
-         printf("Removed\n");
-      }*/
+         //printf("Removed\n");
+      }
       n--;
    }
    fclose(oth);
@@ -131,7 +122,6 @@ void testRemove(phashmap map){
    printf("Inserted: %d\nRemoved: %d\n", start, start-map.getSize());
    printf("Removal Time: %f\n", diffclock(end,beg));
 }
-
 void testRemove2(phashmap map){
    FILE *oth;
    printf("Testing removal...        ");
@@ -156,7 +146,8 @@ void testRemove2(phashmap map){
    for (int x = 0; x < count; x++){
       //map.remove(list[count-x]);
       //free(list[count-x]);
-      map.remove(list[x]);
+      string t (list[x]);
+      map.remove(t);
       free(list[x]);
    }
    //for(int i = count-1; i>=0; i--){
