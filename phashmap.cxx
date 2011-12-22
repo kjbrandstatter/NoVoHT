@@ -205,13 +205,9 @@ void phashmap::readFile(){
    if (!data) return;
    char s[300];
    while(fscanf(data, "%s", s) != EOF){
-     // char *key = (char *)calloc(300, sizeof(char));
-      //strcpy(key, s);
       string key(s);
-     // char* val = (char *)calloc(300,sizeof(char));
       fscanf(data,"%s",s);
       string val(s);
-     // strcpy(val,s);
       if (key[0] != '~'){
          put(key,val);
       }
