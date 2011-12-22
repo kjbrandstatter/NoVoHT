@@ -4,7 +4,6 @@
 #include <string>
 #include <locale>
 #include <stdio.h>
-//#include <openssl/md5.h>
 #include "phashmap.h"
 
 phashmap::phashmap(){
