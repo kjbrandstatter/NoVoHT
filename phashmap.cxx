@@ -228,8 +228,8 @@ void phashmap::readFile(){
    writeFile();
 }
 
-unsigned long hash(char* k){ //FNV hash
-   unsigned long x = 14695981039346656037;
+unsigned long long hash(char* k){ //FNV hash
+   unsigned long long x = 14695981039346656037ULL;
    while (*k){
       x = x ^(*k++);
       x = x * 1099511628211;

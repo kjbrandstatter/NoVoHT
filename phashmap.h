@@ -26,7 +26,7 @@ class phashmap{
    int magicNumber;
    float resizeNum;
    public:
-        //phashmap();
+        phashmap();
         //phashmap(int);
         //phashmap(char *);
         phashmap(char *, int, int);
@@ -41,7 +41,7 @@ class phashmap{
         int getCap() {return size;}
 };
 
-unsigned long hash (char* k);
+unsigned long long hash (char* k);
 
 void fsu(pair *);
 #endif
