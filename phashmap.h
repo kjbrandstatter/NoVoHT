@@ -36,7 +36,7 @@ class phashmap{
         ~phashmap();
         int writeFile();
         int put(string,  string);
-        string get(string);
+        string* get(string);
         int remove(string);
         int getSize() {return numEl;}
         int getCap() {return size;}

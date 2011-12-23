@@ -94,11 +94,11 @@ int phashmap::put(string k, string v){
    return write(add);
 }
 
-string phashmap::get(string k){
+string* phashmap::get(string k){
    int loc = hash(k)%size;
    kvpair *cur = kvpairs[loc];
-   while (cur != NULL){
-      if (k.compare(cur->key) == 0) return cur->val;
+   while (cur != NULL && !k.empty()){
+      if (k.compare(cur->key) == 0) return new string(cur->val.c_str());
       cur = cur->next;
    }
    return NULL;

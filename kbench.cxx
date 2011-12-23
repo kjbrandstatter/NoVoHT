@@ -71,7 +71,7 @@ void testGet(phashmap map){
    char f[300];
    while (fscanf(oth, "%s", f) != EOF){
       //printf("Checking %s...    ", f);
-      if (atoi(map.get(f).c_str()) != n){
+      if (atoi(map.get(f)->c_str()) != n){
          printf("FAILED\n");
          //printf("%s,%s,%d\n",f,map.get(f), n);
          return;
@@ -81,9 +81,11 @@ void testGet(phashmap map){
       }
       n--;
    }
+   if (map.get("kevin") != NULL) printf("FAILED\n");
+   else printf("PASSED\n");
    //delete [] f;
    fclose(oth);
-   printf("PASSED\n");
+   //printf("PASSED\n");
    clock_t end=clock();
    testRemove2(map);
    printf("Retrieval time: %f\n", diffclock(end, begin));
@@ -106,7 +108,7 @@ void testRemove(phashmap map){
       //printf("Removing %s...    ", f);
       //map.remove(f);
       if (n%1==0) {map.remove(f); /*printf(".");fflush(stdout);*/}
-      if (atoi(map.get(f).c_str()) != n){
+      if (atoi(map.get(f)->c_str()) != n){
          printf("FAILED\n");
          //printf("%s,%d,%d\n",f,map.get(f), n);
          return;
