@@ -98,7 +98,7 @@ string* phashmap::get(string k){
    int loc = hash(k)%size;
    kvpair *cur = kvpairs[loc];
    while (cur != NULL && !k.empty()){
-      if (k.compare(cur->key) == 0) return new string(cur->val.c_str());
+      if (k.compare(cur->key) == 0) return new string((cur->val).c_str());
       cur = cur->next;
    }
    return NULL;
