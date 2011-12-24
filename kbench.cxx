@@ -57,7 +57,7 @@ void testInsert(){
    printf("Alloc Time: %f\n", diffclock(begin,a));
 }
 
-void testGet(phashmap map){
+void testGet(phashmap &map){
    clock_t begin=clock();
    FILE *oth;
    printf("Testing retrieval...      ");
@@ -91,7 +91,7 @@ void testGet(phashmap map){
    printf("Retrieval time: %f\n", diffclock(end, begin));
 }
 
-void testRemove(phashmap map){
+void testRemove(phashmap &map){
    clock_t beg=clock();
    FILE *oth;
    printf("Testing removal...        ");
@@ -124,7 +124,7 @@ void testRemove(phashmap map){
    printf("Inserted: %d\nRemoved: %d\n", start, start-map.getSize());
    printf("Removal Time: %f\n", diffclock(end,beg));
 }
-void testRemove2(phashmap map){
+void testRemove2(phashmap &map){
    FILE *oth;
    printf("Testing removal...        ");
    fflush(stdout);
