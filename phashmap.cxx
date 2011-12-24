@@ -59,10 +59,10 @@ phashmap::phashmap(char * f, phashmap *map){
    readFile();
 }*/
 phashmap::~phashmap(){
-   writeFile();
+/*   writeFile();
    for (int i = 0; i < size; i++){
       fsu(kvpairs[i]);
-   }
+   }*/
 }
 
 //0 success, -1 no insert, -2 no write
