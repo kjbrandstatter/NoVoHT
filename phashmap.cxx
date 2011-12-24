@@ -59,10 +59,10 @@ phashmap::phashmap(char * f, phashmap *map){
    readFile();
 }*/
 phashmap::~phashmap(){
-/*   writeFile();
+   writeFile();
    for (int i = 0; i < size; i++){
       fsu(kvpairs[i]);
-   }*/
+   }
 }
 
 //0 success, -1 no insert, -2 no write
@@ -146,8 +146,10 @@ int phashmap::writeFile(){
    for (int i=0; i<size;i++){
       kvpair *cur = kvpairs[i];
       while (cur != NULL){
-         if(cur->key.empty() && cur->val.empty())
+         if(!cur->key.empty() && !cur->val.empty()){
+                fgetpos(out, &(cur->pos));
                 fprintf(out, "%s\t%s\n", cur->key.c_str(), cur->val.c_str());
+         }
          cur = cur->next;
       }
    }
