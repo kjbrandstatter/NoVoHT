@@ -55,6 +55,7 @@ void testInsert(){
    testGet(*map);
    printf("Insertion Time: %f\n", diffclock(end, begin));
    printf("Alloc Time: %f\n", diffclock(begin,a));
+   delete [] list;
    delete map;
 }
 

@@ -85,10 +85,10 @@ int phashmap::put(string k, string v){
       return write(add);
    }
    while (cur->next != NULL){
-      if (k.compare(cur->key) == 0) {return -1;}
+      if (k.compare(cur->key) == 0) {delete add; return -1;}
       cur = cur->next;
    }
-   if (k.compare(cur->key) == 0) {return -1;}
+   if (k.compare(cur->key) == 0) {delete add; return -1;}
    cur->next = add;
    numEl++;
    return write(add);
@@ -98,7 +98,7 @@ string* phashmap::get(string k){
    int loc = hash(k)%size;
    kvpair *cur = kvpairs[loc];
    while (cur != NULL && !k.empty()){
-      if (k.compare(cur->key) == 0) return new string((cur->val).c_str());
+      if (k.compare(cur->key) == 0) return &(cur->val);
       cur = cur->next;
    }
    return NULL;
