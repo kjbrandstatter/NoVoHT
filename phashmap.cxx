@@ -63,6 +63,7 @@ phashmap::~phashmap(){
    for (int i = 0; i < size; i++){
       fsu(kvpairs[i]);
    }
+   delete [] kvpairs;
 }
 
 //0 success, -1 no insert, -2 no write
