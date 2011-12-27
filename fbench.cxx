@@ -2,14 +2,15 @@
 #include "time.h"
 #include <string>
 //#include "phashmap.h"
-#include <kchashdb.h>
+//#include <kchashdb.h>
+#include <hash_map>
 #include <cstdlib>
 #include <cstddef>
 #include <sys/time.h>
 #define KEY_LEN 32
 #define VAL_LEN 128
 using namespace std;
-using namespace kyotocabinet;
+using namespace stdext;
 struct timeval tp;
 
 double diffclock(clock_t clock1, clock_t clock2){
@@ -36,7 +37,7 @@ string randomString(int len) {
    }
    return s;
 }
-
+/*
 double testInsert(HashDB map, string keys[], string vals[], int l){
    clock_t a=clock();
    for (int t = 0; t<l; t++){
@@ -66,11 +67,12 @@ double testRemove(HashDB map, string keys[], int l){
    clock_t b=clock();
    return diffclock(b,a);
 }
-
+*/
 int main(int argc, char *argv[]){
-   kyotocabinet::HashDB map;
+//   kyotocabinet::HashDB map;
+   hash_map<string,string> map;
    cout << "\nInitializing key-value pairs for testing\n" << endl;
-   int size = kyotocabinet::atoi(argv[1]);
+   int size = atoi(argv[1]);
    string* keys = new string[size];
    string* vals = new string[size];
    for (int t=0; t<size; t++){
@@ -84,16 +86,15 @@ int main(int argc, char *argv[]){
    cout << "Testing Insertion: Inserting " << size << " elements" << endl;
    clock_t a=clock();
    for (int t = 0; t<size; t++){
-      map.set(keys[t], vals[t]);
+      //map.insert(keys[t], vals[t]);
+      map[keys[t]] = vals[t];
    }
    clock_t b=clock();
    ins = diffclock(b,a);;
    cout << "Testing Retrieval: Retrieving " << size << " elements" << endl;
    a=clock();
    for (int t=0; t<size; t++){
-      string value;
-      map.get(keys[t], &value);
-      if (value.compare(vals[t]) != 0)
+      if (map[keys[t]].compare(vals[t]) != 0)
          cerr << "Get Failed" << endl;
    }
    b=clock();
@@ -101,7 +102,7 @@ int main(int argc, char *argv[]){
    cout << "Testing Removal:   Removing " << size << " elements" << endl;
    a=clock();
    for (int t=0; t<size; t++){
-      map.remove(keys[t]);
+      map[keys[t]] = "";
    }
    b=clock();
    rem = diffclock(b,a);
