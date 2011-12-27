@@ -5,7 +5,7 @@ LDFLAGS=-I
 SOURCE=hashmap.cxx main.cxx
 OBJECTS=phashmap.o main.o
 HEADERS=phashmap.h
-BINS=kbench tonybench iobench fbench
+BINS=kbench tonybench fbench
 
 all: $(BINS)
 
@@ -17,9 +17,6 @@ kbench: phashmap.o kbench.cxx
 
 tonybench: phashmap.o test_hash.cpp
 	$(CC) phashmap.o test_hash.cpp -o tonybench
-
-iobench: phashmap.o inoutbench.cpp
-	$(CC) phashmap.o inoutbench.cpp -o iobench
 
 phashmap.o: phashmap.cxx
 	$(CC) $(CFLAGS) phashmap.cxx

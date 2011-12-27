@@ -49,7 +49,6 @@ phashmap::phashmap(string f,int s, int m, float r){
    size = s;
    numEl=0;
    file = f;
-   cout << file <<endl;
    readFile();
 }
 /*
