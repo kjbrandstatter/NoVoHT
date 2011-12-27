@@ -63,23 +63,26 @@ double testRemove(phashmap &map, string keys[], int l){
 }
 
 int main(int argc, char *argv[]){
+   cout << "\nInitializing key-value pairs for testing\n" << endl;
    int size = atoi(argv[1]);
-   string keys[size];
-   string vals[size];
+   string* keys = new string[size];
+   string* vals = new string[size];
    for (int t=0; t<size; t++){
       keys[t] = randomString(KEY_LEN);
       vals[t] = randomString(VAL_LEN);
    }
    phashmap map ("fbench.data", 1000000, 10000, .7);
+   //phashmap map ("", 1000000, 10000, .7);
+   //phashmap map ("fbench.data", 1000000, 10000);
    cout << "Testing Insertion: Inserting " << size << " elements" << endl;
-   int ins = testInsert(map, keys, vals, size);
+   double ins = testInsert(map, keys, vals, size);
    cout << "Testing Retrieval: Retrieving " << size << " elements" << endl;
-   int ret = testGet(map, keys, vals, size);
+   double ret = testGet(map, keys, vals, size);
    cout << "Testing Removal:   Removing " << size << " elements" << endl;
-   int rem = testRemove(map, keys, size);
-   cout << "\nInsertion done in " << ins << " seconds" << endl;
-   cout << "Retrieval done in " << ret << " seconds" << endl;
-   cout << "Removal done in " << rem << " seconds" << endl;
+   double rem = testRemove(map, keys, size);
+   cout << "\nInsertion done in " << ins << " milliseconds" << endl;
+   cout << "Retrieval done in " << ret << " milliseconds" << endl;
+   cout << "Removal done in " << rem << " milliseconds" << endl;
 
    return 0;
 }

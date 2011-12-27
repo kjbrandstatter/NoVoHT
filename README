@@ -22,6 +22,7 @@ put(key, value) where key is char* and value is int (i can change this if
         -1 = didnt insert/failed
         -2 = insert but didnt write
 get(key) returns pointer to value
+
 remove(key) removes key-value pair
         0 = success
         -1 = didnt remove/failed
@@ -40,7 +41,7 @@ Documentation:
 
 phashmap(char* filename, int size, int rewrite) OR
 phashmap(char* filename, int size, int rewrite, float resize)
-        filename = persistent file (NULL for no persistance)
+        filename = persistent file (empty string for no persistance)
         size = initial number of slots in map
         rewrite = number of removes before garbage collection (-1 to not rewrite based on number of removals)
         resize = percentage of size before size is doubled
