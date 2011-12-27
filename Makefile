@@ -5,6 +5,9 @@ LDFLAGS=-I
 SOURCE=hashmap.cxx main.cxx
 OBJECTS=phashmap.o main.o
 HEADERS=phashmap.h
+BINS=kbench tonybench iobench
+
+all: kbench tonybench inout
 
 kbench: phashmap.o kbench.cxx
 	$(CC) phashmap.o kbench.cxx -o kbench
@@ -19,9 +22,9 @@ phashmap.o: phashmap.cxx
 	$(CC) $(CFLAGS) phashmap.cxx
 
 clean:
-	rm *.o $(PROJECT)
+	rm *.o $(BINS)
 
-rebuild: clean all
+rebuild: clean
 
 test: kbench
 	./kbench
