@@ -220,10 +220,18 @@ void phashmap::readFile(){
 }
 
 unsigned long long hash(string k){ //FNV hash
-   unsigned long long x = 14695981039346656037ULL;
+#include "config"
+#if SIZE_OF_LONG_LONG_INT==8
+#define FNV_PRIME 14695981039346656037
+#define FNV_OFFSET 1099511628211
+#else //SIZE_OF_LONG_LONG_INT == 4
+#define FNV_PRIME 16777619
+#define FNV_OFFSET 2166136261
+#endif
+   unsigned long long x = FNV_PRIME;
    for (unsigned int y=0;y<k.length();y++){
       x = x ^ (k[y]);
-      x = x * 1099511628211;
+      x = x * FNV_OFFSET;
    }
    return (x);
 }
