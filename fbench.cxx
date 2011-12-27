@@ -1,12 +1,15 @@
 #include <iostream>
 #include "time.h"
 #include <string>
-#include "phashmap.h"
+//#include "phashmap.h"
+#include <kchashdb.h>
 #include <cstdlib>
 #include <cstddef>
 #include <sys/time.h>
 #define KEY_LEN 32
 #define VAL_LEN 128
+using namespace std;
+using namespace kyotocabinet;
 struct timeval tp;
 
 double diffclock(clock_t clock1, clock_t clock2){
@@ -24,7 +27,7 @@ double getTime_usec() {
 
 string randomString(int len) {
    string s(len, ' ');
-   srand(getpid() + clock() + getTime_usec());
+   srand(/*getpid()*/ clock() + getTime_usec());
    static const char alphanum[] = "0123456789"
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
       "abcdefghijklmnopqrstuvwxyz";
@@ -34,26 +37,28 @@ string randomString(int len) {
    return s;
 }
 
-double testInsert(phashmap &map, string keys[], string vals[], int l){
+double testInsert(HashDB map, string keys[], string vals[], int l){
    clock_t a=clock();
    for (int t = 0; t<l; t++){
-      map.put(keys[t], vals[t]);
+      map.set(keys[t], vals[t]);
    }
    clock_t b=clock();
    return diffclock(b,a);;
 }
 
-double testGet(phashmap &map, string keys[],  string vals[], int l){
+double testGet(HashDB map, string keys[],  string vals[], int l){
    clock_t a=clock();
    for (int t=0; t<l; t++){
-      if (map.get(keys[t])->compare(vals[t]) != 0)
+      string value;
+      map.get(keys[t], &value);
+      if (value.compare(vals[t]) != 0)
          cerr << "Get Failed" << endl;
    }
    clock_t b=clock();
    return diffclock(b,a);
 }
 
-double testRemove(phashmap &map, string keys[], int l){
+double testRemove(HashDB map, string keys[], int l){
    clock_t a=clock();
    for (int t=0; t<l; t++){
       map.remove(keys[t]);
@@ -63,23 +68,43 @@ double testRemove(phashmap &map, string keys[], int l){
 }
 
 int main(int argc, char *argv[]){
+   kyotocabinet::HashDB map;
    cout << "\nInitializing key-value pairs for testing\n" << endl;
-   int size = atoi(argv[1]);
+   int size = kyotocabinet::atoi(argv[1]);
    string* keys = new string[size];
    string* vals = new string[size];
    for (int t=0; t<size; t++){
       keys[t] = randomString(KEY_LEN);
       vals[t] = randomString(VAL_LEN);
    }
-   phashmap map ("fbench.data", 1000000, 10000, .7);
+   //phashmap map ("fbench.data", 1000000, 10000, .7);
    //phashmap map ("", 1000000, 10000, .7);
    //phashmap map ("fbench.data", 1000000, 10000);
+   double ins, ret, rem;
    cout << "Testing Insertion: Inserting " << size << " elements" << endl;
-   double ins = testInsert(map, keys, vals, size);
+   clock_t a=clock();
+   for (int t = 0; t<size; t++){
+      map.set(keys[t], vals[t]);
+   }
+   clock_t b=clock();
+   ins = diffclock(b,a);;
    cout << "Testing Retrieval: Retrieving " << size << " elements" << endl;
-   double ret = testGet(map, keys, vals, size);
+   a=clock();
+   for (int t=0; t<size; t++){
+      string value;
+      map.get(keys[t], &value);
+      if (value.compare(vals[t]) != 0)
+         cerr << "Get Failed" << endl;
+   }
+   b=clock();
+   ret =  diffclock(b,a);
    cout << "Testing Removal:   Removing " << size << " elements" << endl;
-   double rem = testRemove(map, keys, size);
+   a=clock();
+   for (int t=0; t<size; t++){
+      map.remove(keys[t]);
+   }
+   b=clock();
+   rem = diffclock(b,a);
    cout << "\nInsertion done in " << ins << " milliseconds" << endl;
    cout << "Retrieval done in " << ret << " milliseconds" << endl;
    cout << "Removal done in " << rem << " milliseconds" << endl;

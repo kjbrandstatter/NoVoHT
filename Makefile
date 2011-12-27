@@ -10,7 +10,7 @@ BINS=kbench tonybench fbench
 all: $(BINS)
 
 fbench: phashmap.o fbench.cxx
-	$(CC) phashmap.o fbench.cxx -o fbench
+	$(CC) phashmap.o fbench.cxx -o fbench -I/home/kevin/include -L/home/kevin/lib
 
 kbench: phashmap.o kbench.cxx
 	$(CC) phashmap.o kbench.cxx -o kbench
