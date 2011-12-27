@@ -7,7 +7,10 @@ OBJECTS=phashmap.o main.o
 HEADERS=phashmap.h
 BINS=kbench tonybench iobench
 
-all: kbench tonybench inout
+all: kbench tonybench inout fbench
+
+fbench: phashmap.o fbench.cxx
+	$(CC) phashmap.o fbench.cxx -o fbench
 
 kbench: phashmap.o kbench.cxx
 	$(CC) phashmap.o kbench.cxx -o kbench
