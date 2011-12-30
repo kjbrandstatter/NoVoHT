@@ -70,7 +70,7 @@ int main(int argc, char *argv[]){
       keys[t] = randomString(KEY_LEN);
       vals[t] = randomString(VAL_LEN);
    }
-   phashmap map ("fbench.data", 1000000, 10000, .7);
+   phashmap map ("/dev/shm/fbench.data", 1000000, 10000, .7);
    //phashmap map ("", 1000000, 10000, .7);
    //phashmap map ("fbench.data", 1000000, -1);
    double ins, ret, rem;
