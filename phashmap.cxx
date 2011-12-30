@@ -38,7 +38,8 @@ phashmap::phashmap(string f,int s, int m){
    resizeNum = 0;
    size = s;
    numEl=0;
-   file = f;
+   filename=f;
+   dbfile = fopen(f.c_str(), "r+");
    readFile();
 }
 phashmap::phashmap(string f,int s, int m, float r){
@@ -48,7 +49,8 @@ phashmap::phashmap(string f,int s, int m, float r){
    resizeNum = r;
    size = s;
    numEl=0;
-   file = f;
+   filename=f;
+   dbfile = fopen(f.c_str(), "r+");
    readFile();
 }
 /*
@@ -65,6 +67,7 @@ phashmap::~phashmap(){
       fsu(kvpairs[i]);
    }
    delete [] kvpairs;
+   fclose(dbfile);
 }
 
 //0 success, -1 no insert, -2 no write
@@ -143,19 +146,20 @@ int phashmap::remove(string k){
 //write hashmap to file
 int phashmap::writeFile(){
    int ret =0;
-   FILE * out = fopen(file.c_str(), "w");
-   if (!out)return -2;
+   if (!dbfile)return -2;
+   dbfile = freopen(filename.c_str(), "w", dbfile);
    for (int i=0; i<size;i++){
       kvpair *cur = kvpairs[i];
       while (cur != NULL){
          if(!cur->key.empty() && !cur->val.empty()){
-                fgetpos(out, &(cur->pos));
-                fprintf(out, "%s\t%s\n", cur->key.c_str(), cur->val.c_str());
+                fgetpos(dbfile, &(cur->pos));
+                fprintf(dbfile, "%s\t%s\n", cur->key.c_str(), cur->val.c_str());
          }
          cur = cur->next;
       }
    }
-   fclose(out);
+   dbfile = freopen(filename.c_str(), "r+", dbfile);
+   //fclose(out);
    return ret;
 }
 
@@ -182,41 +186,39 @@ void phashmap::resize(int ns){
 //success 0 fail -2
 //write kvpair to file
 int phashmap::write(kvpair * p){
-   if(file.empty()) return -2;
-   FILE * data = fopen(file.c_str(), "a");
-   if (!data) return -2;
-   fgetpos(data, &(p->pos));
-   fprintf(data, "%s\t%s\n", p->key.c_str(), p->val.c_str());
-   fclose(data);
+   //FILE * data = fopen(file.c_str(), "a");
+   if (!dbfile) return -2;
+   fseek(dbfile, 0, SEEK_END);
+   fgetpos(dbfile, &(p->pos));
+   fprintf(dbfile, "%s\t%s\n", p->key.c_str(), p->val.c_str());
+   //fclose(data);
    return 0;
 }
 
 //success 0 fail -2
 //mark line in file for deletion
 int phashmap::mark(fpos_t position){
-   if(file.empty()) return -2;
-   FILE * data = fopen(file.c_str(), "r+");
-   if (!data) return -2;
-   fsetpos(data, &position);
-   fputc((int) '~', data);
-   fclose(data);
+   if(!dbfile) return -2;
+   //FILE * data = fopen(file.c_str(), "r+");
+   fsetpos(dbfile, &position);
+   fputc((int) '~', dbfile);
+   //fclose(data);
    return 0;
 }
 
 void phashmap::readFile(){
-   if(file.empty()) return;
-   FILE * data = fopen(file.c_str(), "r+");
-   if (!data) return;
+   if(!dbfile) return;
+   //FILE * data = fopen(file.c_str(), "r+");
    char s[300];
-   while(fscanf(data, "%s", s) != EOF){
+   while(fscanf(dbfile, "%s", s) != EOF){
       string key(s);
-      fscanf(data,"%s",s);
+      fscanf(dbfile,"%s",s);
       string val(s);
       if (key[0] != '~'){
          put(key,val);
       }
    }
-   fclose(data);
+   //fclose(data);
    writeFile();
 }
 

@@ -17,7 +17,8 @@ class phashmap{
    int size;
    kvpair** kvpairs;
    int numEl;
-   string file;
+   FILE * dbfile;
+   string filename;
    int nRem;
    void resize(int ns);
    int write(kvpair *);

@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
    }
    phashmap map ("fbench.data", 1000000, 10000, .7);
    //phashmap map ("", 1000000, 10000, .7);
-   //phashmap map ("fbench.data", 1000000, 10000);
+   //phashmap map ("fbench.data", 1000000, -1);
    double ins, ret, rem;
    cout << "Testing Insertion: Inserting " << size << " elements" << endl;
    ins = testInsert(map, keys,vals,size);
