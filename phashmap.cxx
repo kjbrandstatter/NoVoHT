@@ -67,7 +67,7 @@ phashmap::~phashmap(){
       fsu(kvpairs[i]);
    }
    delete [] kvpairs;
-   fclose(dbfile);
+   if (dbfile) fclose(dbfile);
 }
 
 //0 success, -1 no insert, -2 no write
