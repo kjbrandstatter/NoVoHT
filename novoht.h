@@ -1,6 +1,6 @@
 #ifndef PHASHMAP_H
 #define PHASHMAP_H
-#include "phashmap.h"
+#include "novoht.h"
 #include <string>
 #include <stdio.h>
 using namespace std;
@@ -13,7 +13,7 @@ struct kvpair{
    fpos_t pos;
 };
 
-class phashmap{
+class NoVoHT{
    int size;
    kvpair** kvpairs;
    int numEl;
@@ -28,13 +28,13 @@ class phashmap{
    int magicNumber;
    float resizeNum;
    public:
-        phashmap();
-        //phashmap(int);
-        //phashmap(char *);
-        phashmap(string, int, int);
-        phashmap(string, int, int, float);
-        //phashmap(char *, phashmap*);
-        ~phashmap();
+        NoVoHT();
+        //NoVoHT(int);
+        //NoVoHT(char *);
+        NoVoHT(string, int, int);
+        NoVoHT(string, int, int, float);
+        //NoVoHT(char *, NoVoHT*);
+        ~NoVoHT();
         int writeFile();
         int put(string,  string);
         string* get(string);

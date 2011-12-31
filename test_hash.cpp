@@ -8,7 +8,7 @@
 
 
 #include <string>
-#include "phashmap.h"
+#include "novoht.h"
 #include <stdlib.h>
 #include <sys/time.h>
 //#include <stdio.h>
@@ -40,7 +40,7 @@ int main(int argc, char * argv[]){
 
 	int num = atoi(argv[1]);
 	string fileName = "hashmap.data";
-	phashmap map = phashmap(fileName, 100000, 1000, 0.7);
+	NoVoHT map = NoVoHT(fileName, 100000, 1000, 0.7);
 	int keyLen = 32;
 	int valueLen = 96;
 	for(int i=0; i<num; i++){

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "time.h"
 #include <string>
-#include "phashmap.h"
+#include "novoht.h"
 #include <cstdlib>
 #include <cstddef>
 #include <sys/time.h>
@@ -34,7 +34,7 @@ string randomString(int len) {
    }
    return s;
 }
-double testInsert(phashmap &map, string keys[], string vals[], int l){
+double testInsert(NoVoHT &map, string keys[], string vals[], int l){
    clock_t a=clock();
    for (int t = 0; t<l; t++){
       map.put(keys[t], vals[t]);
@@ -43,7 +43,7 @@ double testInsert(phashmap &map, string keys[], string vals[], int l){
    return diffclock(b,a);;
 }
 
-double testGet(phashmap &map, string keys[],  string vals[], int l){
+double testGet(NoVoHT &map, string keys[],  string vals[], int l){
    clock_t a=clock();
    for (int t=0; t<l; t++){
       if (map.get(keys[t])->compare(vals[t]) != 0)
@@ -53,7 +53,7 @@ double testGet(phashmap &map, string keys[],  string vals[], int l){
    return diffclock(b,a);
 }
 
-double testRemove(phashmap &map, string keys[], int l){
+double testRemove(NoVoHT &map, string keys[], int l){
    clock_t a=clock();
    for (int t=0; t<l; t++){
       map.remove(keys[t]);
@@ -70,9 +70,10 @@ int main(int argc, char *argv[]){
       keys[t] = randomString(KEY_LEN);
       vals[t] = randomString(VAL_LEN);
    }
-   //phashmap map ("/dev/shm/fbench.data", 1000000, 10000, .7);
-   //phashmap map ("", 1000000, 10000, .7);
-   phashmap map ("/dev/shm/fbench.data", 1000000, -1);
+   //NoVoHT map ("/dev/shm/fbench.data", 1000000, 10000, .7);
+   //NoVoHT map ("", 1000000, 10000, .7);
+   //NoVoHT map ("", 1000000, -1);
+   NoVoHT map ("/dev/shm/fbench.data", 1000000, -1);
    double ins, ret, rem;
    cout << "Testing Insertion: Inserting " << size << " elements" << endl;
    ins = testInsert(map, keys,vals,size);

@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <new>
-#include "phashmap.h"
+#include "novoht.h"
 #include "kbench.h"
 #include "time.h"
 #define SIZE 1000000
@@ -31,7 +31,7 @@ void testInsert(){
    }
    int n =NUMEL;
    clock_t a=clock();
-   phashmap *map = new phashmap("hash.table", size, 10000, 2/3);
+   NoVoHT *map = new NoVoHT("hash.table", size, 10000, 2/3);
    std::string *list = new string[n];
    char f[300];
    int count = 0;
@@ -59,7 +59,7 @@ void testInsert(){
    delete map;
 }
 
-void testGet(phashmap &map){
+void testGet(NoVoHT &map){
    clock_t begin=clock();
    FILE *oth;
    printf("Testing retrieval...      ");
@@ -93,7 +93,7 @@ void testGet(phashmap &map){
    printf("Retrieval time: %f\n", diffclock(end, begin));
 }
 
-void testRemove(phashmap &map){
+void testRemove(NoVoHT &map){
    clock_t beg=clock();
    FILE *oth;
    printf("Testing removal...        ");
@@ -126,7 +126,7 @@ void testRemove(phashmap &map){
    printf("Inserted: %d\nRemoved: %d\n", start, start-map.getSize());
    printf("Removal Time: %f\n", diffclock(end,beg));
 }
-void testRemove2(phashmap &map){
+void testRemove2(NoVoHT &map){
    FILE *oth;
    printf("Testing removal...        ");
    fflush(stdout);

@@ -3,23 +3,23 @@ CC=g++
 CFLAGS=-c -Wall
 LDFLAGS=-I
 SOURCE=hashmap.cxx main.cxx
-OBJECTS=phashmap.o main.o
-HEADERS=phashmap.h
+OBJECTS=novoht.o main.o
+HEADERS=novoht.h
 BINS=kbench tonybench fbench
 
 all: $(BINS)
 
-fbench: phashmap.o fbench.cxx
-	$(CC) phashmap.o fbench.cxx -o fbench
+fbench: novoht.o fbench.cxx
+	$(CC) novoht.o fbench.cxx -o fbench
 
-kbench: phashmap.o kbench.cxx
-	$(CC) phashmap.o kbench.cxx -o kbench
+kbench: novoht.o kbench.cxx
+	$(CC) novoht.o kbench.cxx -o kbench
 
-tonybench: phashmap.o test_hash.cpp
-	$(CC) phashmap.o test_hash.cpp -o tonybench
+tonybench: novoht.o test_hash.cpp
+	$(CC) novoht.o test_hash.cpp -o tonybench
 
-phashmap.o: phashmap.cxx
-	$(CC) $(CFLAGS) phashmap.cxx
+novoht.o: novoht.cxx
+	$(CC) $(CFLAGS) novoht.cxx
 
 clean:
 	rm *.o $(BINS)

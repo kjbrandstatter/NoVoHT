@@ -5,9 +5,9 @@
 #include <locale>
 #include <stdio.h>
 #include <iostream>
-#include "phashmap.h"
+#include "novoht.h"
 
-phashmap::phashmap(){
+NoVoHT::NoVoHT(){
    kvpairs = new kvpair*[1000];
    size = 1000;
    numEl = 0;
@@ -16,14 +16,14 @@ phashmap::phashmap(){
 }
 
 /*
-phashmap::phashmap(int s){
+NoVoHT::NoVoHT(int s){
    kvpairs = new kvpair*[s];
    size = s;
    numEl=0;
    file = NULL;
 }
 
-phashmap::phashmap(char * f){
+NoVoHT::NoVoHT(char * f){
    kvpairs = new kvpair*[1000];
    size = 1000;
    numEl=0;
@@ -31,7 +31,7 @@ phashmap::phashmap(char * f){
    readFile();
 }
 */
-phashmap::phashmap(string f,int s, int m){
+NoVoHT::NoVoHT(string f,int s, int m){
    kvpairs = new kvpair*[s];
    magicNumber = m;
    nRem = 0;
@@ -42,7 +42,7 @@ phashmap::phashmap(string f,int s, int m){
    dbfile = fopen(f.c_str(), "r+");
    readFile();
 }
-phashmap::phashmap(string f,int s, int m, float r){
+NoVoHT::NoVoHT(string f,int s, int m, float r){
    kvpairs = new kvpair*[s];
    magicNumber = m;
    nRem = 0;
@@ -54,14 +54,14 @@ phashmap::phashmap(string f,int s, int m, float r){
    readFile();
 }
 /*
-phashmap::phashmap(char * f, phashmap *map){
+NoVoHT::NoVoHT(char * f, NoVoHT *map){
    kvpairs = new kvpair*[1000];
    size = 1000;
    numEl=0;
    file = f;
    readFile();
 }*/
-phashmap::~phashmap(){
+NoVoHT::~NoVoHT(){
    writeFile();
    for (int i = 0; i < size; i++){
       fsu(kvpairs[i]);
@@ -71,7 +71,7 @@ phashmap::~phashmap(){
 }
 
 //0 success, -1 no insert, -2 no write
-int phashmap::put(string k, string v){
+int NoVoHT::put(string k, string v){
    if (numEl >= size*resizeNum) {
       if (resizeNum !=0){
          resize(size*2);
@@ -99,7 +99,7 @@ int phashmap::put(string k, string v){
    return write(add);
 }
 
-string* phashmap::get(string k){
+string* NoVoHT::get(string k){
    int loc = hash(k)%size;
    kvpair *cur = kvpairs[loc];
    while (cur != NULL && !k.empty()){
@@ -110,7 +110,7 @@ string* phashmap::get(string k){
 }
 
 //return 0 for success, -1 fail to remove, -2+ write failure
-int phashmap::remove(string k){
+int NoVoHT::remove(string k){
    int ret =0;
    int loc = hash(k)%size;
    kvpair *cur = kvpairs[loc];
@@ -144,7 +144,7 @@ int phashmap::remove(string k){
 
 //return 0 if success -2 if failed
 //write hashmap to file
-int phashmap::writeFile(){
+int NoVoHT::writeFile(){
    int ret =0;
    if (!dbfile)return -2;
    dbfile = freopen(filename.c_str(), "w", dbfile);
@@ -165,7 +165,7 @@ int phashmap::writeFile(){
 
 //success 0 fail -2
 //resize the hashmap's base size
-void phashmap::resize(int ns){
+void NoVoHT::resize(int ns){
    int olds = size;
    size = ns;
    kvpair** old = kvpairs;
@@ -185,7 +185,7 @@ void phashmap::resize(int ns){
 
 //success 0 fail -2
 //write kvpair to file
-int phashmap::write(kvpair * p){
+int NoVoHT::write(kvpair * p){
    //FILE * data = fopen(file.c_str(), "a");
    if (!dbfile) return -2;
    fseek(dbfile, 0, SEEK_END);
@@ -197,7 +197,7 @@ int phashmap::write(kvpair * p){
 
 //success 0 fail -2
 //mark line in file for deletion
-int phashmap::mark(fpos_t position){
+int NoVoHT::mark(fpos_t position){
    if(!dbfile) return -2;
    //FILE * data = fopen(file.c_str(), "r+");
    fsetpos(dbfile, &position);
@@ -206,7 +206,7 @@ int phashmap::mark(fpos_t position){
    return 0;
 }
 
-void phashmap::readFile(){
+void NoVoHT::readFile(){
    if(!dbfile) return;
    //FILE * data = fopen(file.c_str(), "r+");
    char s[300];
