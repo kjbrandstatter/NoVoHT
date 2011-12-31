@@ -1,0 +1,3 @@
+run make to compile all benchmark programs
+run make (name) to compile specific benchmark
+run make NoVoHT.o to compile the NoVoHT object file
