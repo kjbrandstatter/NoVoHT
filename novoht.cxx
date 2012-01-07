@@ -40,6 +40,7 @@ NoVoHT::NoVoHT(string f,int s, int m){
    numEl=0;
    filename=f;
    dbfile = fopen(f.c_str(), "r+");
+   if (!dbfile) dbfile = fopen(f.c_str(), "w+");
    readFile();
 }
 NoVoHT::NoVoHT(string f,int s, int m, float r){
@@ -51,6 +52,7 @@ NoVoHT::NoVoHT(string f,int s, int m, float r){
    numEl=0;
    filename=f;
    dbfile = fopen(f.c_str(), "r+");
+   if (!dbfile) dbfile = fopen(f.c_str(), "w+");
    readFile();
 }
 /*
@@ -77,7 +79,7 @@ int NoVoHT::put(string k, string v){
          resize(size*2);
       }
    }
-   int slot;
+   long slot;
    slot = hash(k)%size;
    kvpair *cur = kvpairs[slot];
    kvpair *add = new kvpair;
@@ -147,7 +149,7 @@ int NoVoHT::remove(string k){
 int NoVoHT::writeFile(){
    int ret =0;
    if (!dbfile)return -2;
-   dbfile = freopen(filename.c_str(), "w", dbfile);
+   dbfile = freopen(filename.c_str(), "w+", dbfile);
    for (int i=0; i<size;i++){
       kvpair *cur = kvpairs[i];
       while (cur != NULL){
@@ -158,7 +160,6 @@ int NoVoHT::writeFile(){
          cur = cur->next;
       }
    }
-   dbfile = freopen(filename.c_str(), "r+", dbfile);
    //fclose(out);
    return ret;
 }

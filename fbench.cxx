@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstddef>
 #include <sys/time.h>
+#include "meta.pb.h"
 #define KEY_LEN 32
 #define VAL_LEN 128
 using namespace std;
@@ -66,14 +67,32 @@ int main(int argc, char *argv[]){
    int size = atoi(argv[1]);
    string* keys = new string[size];
    string* vals = new string[size];
+   int i;
    for (int t=0; t<size; t++){
-      keys[t] = randomString(KEY_LEN);
-      vals[t] = randomString(VAL_LEN);
+      Package package, package_ret;
+      string key = randomString(25);//as key
+      package.set_virtualpath(key); 
+      package.set_isdir(true);
+      package.set_replicano(5); 
+      package.set_operation(3); 
+      package.set_realfullpath("Some-Real-longer-longer-and-longer-Paths--------");
+      package.add_listitem("item-----1");
+      package.add_listitem("item-----2");
+      package.add_listitem("item-----3");
+      package.add_listitem("item-----4");
+      package.add_listitem("item-----5");
+      string value = package.SerializeAsString();
+      keys[t] = key;
+      vals[t] = value;
    }
+   //for (int t=0; t<size; t++){
+   //   keys[t] = randomString(KEY_LEN);
+   //   vals[t] = randomString(VAL_LEN);
+   //}
    //NoVoHT map ("/dev/shm/fbench.data", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
-   NoVoHT map ("/dev/shm/fbench.data", 1000000, -1);
+   NoVoHT map ("/dev/shm/fbench.data", 100000000, -1);
    double ins, ret, rem;
    cout << "Testing Insertion: Inserting " << size << " elements" << endl;
    ins = testInsert(map, keys,vals,size);
