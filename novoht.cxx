@@ -64,12 +64,14 @@ NoVoHT::NoVoHT(char * f, NoVoHT *map){
    readFile();
 }*/
 NoVoHT::~NoVoHT(){
-   writeFile();
+   if (dbfile){
+      writeFile();
+      fclose(dbfile);
+   }
    for (int i = 0; i < size; i++){
       fsu(kvpairs[i]);
    }
    delete [] kvpairs;
-   if (dbfile) fclose(dbfile);
 }
 
 //0 success, -1 no insert, -2 no write
@@ -149,7 +151,10 @@ int NoVoHT::remove(string k){
 int NoVoHT::writeFile(){
    int ret =0;
    if (!dbfile)return -2;
-   dbfile = freopen(filename.c_str(), "w+", dbfile);
+   //fclose(dbfile);
+   //dbfile = fopen(filename.c_str(), "w+");
+   //dbfile = freopen(filename.c_str(), "w+", dbfile);
+   fseek(dbfile, 0,SEEK_CUR);
    for (int i=0; i<size;i++){
       kvpair *cur = kvpairs[i];
       while (cur != NULL){
@@ -160,6 +165,7 @@ int NoVoHT::writeFile(){
          cur = cur->next;
       }
    }
+   ftruncate(fileno(dbfile), (off_t)SEEK_CUR-SEEK_SET);
    //fclose(out);
    return ret;
 }
@@ -240,7 +246,8 @@ unsigned long long hash(string k){ //FNV hash
 }
 
 void fsu(kvpair* p){
-   if(p == NULL) return;
-   fsu(p->next);
-   delete p;
+   if(p != NULL){
+      fsu(p->next);
+      delete p;
+   }
 }
