@@ -33,6 +33,9 @@ NoVoHT::NoVoHT(char * f){
 */
 NoVoHT::NoVoHT(string f,int s, int m){
    kvpairs = new kvpair*[s];
+   for (int x = 0;x<s;s++){
+      kvpairs[x] = NULL;
+   }
    magicNumber = m;
    nRem = 0;
    resizeNum = 0;
@@ -45,6 +48,9 @@ NoVoHT::NoVoHT(string f,int s, int m){
 }
 NoVoHT::NoVoHT(string f,int s, int m, float r){
    kvpairs = new kvpair*[s];
+   for (int x = 0;x<s;x++){
+      kvpairs[x] = NULL;
+   }
    magicNumber = m;
    nRem = 0;
    resizeNum = r;
@@ -64,12 +70,14 @@ NoVoHT::NoVoHT(char * f, NoVoHT *map){
    readFile();
 }*/
 NoVoHT::~NoVoHT(){
-   writeFile();
+   if (dbfile){
+      writeFile();
+      fclose(dbfile);
+   }
    for (int i = 0; i < size; i++){
       fsu(kvpairs[i]);
    }
    delete [] kvpairs;
-   if (dbfile) fclose(dbfile);
 }
 
 //0 success, -1 no insert, -2 no write
@@ -79,7 +87,7 @@ int NoVoHT::put(string k, string v){
          resize(size*2);
       }
    }
-   long slot;
+   int slot;
    slot = hash(k)%size;
    kvpair *cur = kvpairs[slot];
    kvpair *add = new kvpair;
@@ -149,7 +157,10 @@ int NoVoHT::remove(string k){
 int NoVoHT::writeFile(){
    int ret =0;
    if (!dbfile)return -2;
-   dbfile = freopen(filename.c_str(), "w+", dbfile);
+   //fclose(dbfile);
+   //dbfile = fopen(filename.c_str(), "w+");
+   //dbfile = freopen(filename.c_str(), "w+", dbfile);
+   fseek(dbfile, 0,SEEK_CUR);
    for (int i=0; i<size;i++){
       kvpair *cur = kvpairs[i];
       while (cur != NULL){
@@ -160,6 +171,7 @@ int NoVoHT::writeFile(){
          cur = cur->next;
       }
    }
+   ftruncate(fileno(dbfile), (off_t)SEEK_CUR-SEEK_SET-1);
    //fclose(out);
    return ret;
 }
@@ -171,6 +183,7 @@ void NoVoHT::resize(int ns){
    size = ns;
    kvpair** old = kvpairs;
    kvpairs = new kvpair*[ns];
+   for (int z=0; z<ns; z++) { kvpairs[z] = NULL;}
    numEl = 0;
    for (int i=0; i<olds;i++){
       kvpair *cur = old[i];
@@ -240,7 +253,8 @@ unsigned long long hash(string k){ //FNV hash
 }
 
 void fsu(kvpair* p){
-   if(p == NULL) return;
-   fsu(p->next);
-   delete p;
+   if(p != NULL){
+      fsu(p->next);
+      delete p;
+   }
 }
