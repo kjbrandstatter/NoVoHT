@@ -204,7 +204,7 @@ int NoVoHT::write(kvpair * p){
    if (!dbfile) return -2;
    fseek(dbfile, 0, SEEK_END);
    fgetpos(dbfile, &(p->pos));
-   fprintf(dbfile, "%s\t%s\n", p->key.c_str(), p->val.c_str());
+   fprintf(dbfile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
    //fclose(data);
    return 0;
 }
@@ -224,9 +224,9 @@ void NoVoHT::readFile(){
    if(!dbfile) return;
    //FILE * data = fopen(file.c_str(), "r+");
    char s[300];
-   while(fscanf(dbfile, "%s", s) != EOF){
+   while(fscanf(dbfile, "%s\t", s) != EOF){
       string key(s);
-      fscanf(dbfile,"%s",s);
+      fscanf(dbfile,"%s\t",s);
       string val(s);
       if (key[0] != '~'){
          put(key,val);
