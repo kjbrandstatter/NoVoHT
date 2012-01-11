@@ -212,7 +212,7 @@ int NoVoHT::write(kvpair * p){
 //success 0 fail -2
 //mark line in file for deletion
 int NoVoHT::mark(fpos_t position){
-   if(!dbfile) return -2;
+   if (!dbfile)return (filename.compare("") ? 0 : -2);
    //FILE * data = fopen(file.c_str(), "r+");
    fsetpos(dbfile, &position);
    fputc((int) '~', dbfile);
