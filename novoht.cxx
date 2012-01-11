@@ -156,7 +156,7 @@ int NoVoHT::remove(string k){
 //write hashmap to file
 int NoVoHT::writeFile(){
    int ret =0;
-   if (!dbfile)return -2;
+   if (!dbfile)return (filename.compare("") ? 0 : -2);
    //fclose(dbfile);
    //dbfile = fopen(filename.c_str(), "w+");
    //dbfile = freopen(filename.c_str(), "w+", dbfile);
@@ -201,7 +201,7 @@ void NoVoHT::resize(int ns){
 //write kvpair to file
 int NoVoHT::write(kvpair * p){
    //FILE * data = fopen(file.c_str(), "a");
-   if (!dbfile) return -2;
+   if (!dbfile)return (filename.compare("") ? 0 : -2);
    fseek(dbfile, 0, SEEK_END);
    fgetpos(dbfile, &(p->pos));
    fprintf(dbfile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
