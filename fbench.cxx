@@ -67,7 +67,7 @@ int main(int argc, char *argv[]){
    int size = atoi(argv[1]);
    string* keys = new string[size];
    string* vals = new string[size];
-   int i;
+   /*
    for (int t=0; t<size; t++){
       Package package, package_ret;
       string key = randomString(25);//as key
@@ -85,11 +85,12 @@ int main(int argc, char *argv[]){
       keys[t] = key;
       vals[t] = value;
    }
-   //for (int t=0; t<size; t++){
-   //   keys[t] = randomString(KEY_LEN);
-   //   vals[t] = randomString(VAL_LEN);
-   //}
-   NoVoHT map ("fbench.data", 1000000, 10000, .7);
+   */
+   for (int t=0; t<size; t++){
+      keys[t] = randomString(KEY_LEN);
+      vals[t] = randomString(VAL_LEN);
+   }
+   NoVoHT map ("fbench.data", 1000000, 10000, -1);
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
    //NoVoHT map ("/dev/shm/fbench.data", 1000000, -1);
