@@ -224,7 +224,7 @@ void NoVoHT::readFile(){
    if(!dbfile) return;
    //FILE * data = fopen(file.c_str(), "r+");
    char s[300];
-   while(fscanf(dbfile, "%s\t", s) != EOF){
+   while(fscanf(dbfile, "%s", s) != EOF){
       string key(s);
       fscanf(dbfile,"%s\t",s);
       string val(s);
