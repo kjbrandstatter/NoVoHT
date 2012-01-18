@@ -89,21 +89,17 @@ int main(int argc, char *argv[]){
       keys[t] = randomString(KEY_LEN);
       vals[t] = randomString(VAL_LEN);
    }
-<<<<<<< HEAD
-   NoVoHT map ("/dev/shm/fbench.data", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
    //NoVoHT map ("/dev/shm/fbench.data", 100000000, -1);
-=======
-   //for (int t=0; t<size; t++){
-   //   keys[t] = randomString(KEY_LEN);
-   //   vals[t] = randomString(VAL_LEN);
-   //}
+   for (int t=0; t<size; t++){
+      keys[t] = randomString(KEY_LEN);
+      vals[t] = randomString(VAL_LEN);
+   }
    NoVoHT map ("fbench.data", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
    //NoVoHT map ("/dev/shm/fbench.data", 1000000, -1);
->>>>>>> 022df9d2bba945e3f0da9ef6edda61c3d982504d
    double ins, ret, rem;
    cout << "Testing Insertion: Inserting " << size << " elements" << endl;
    ins = testInsert(map, keys,vals,size);
