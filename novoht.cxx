@@ -33,7 +33,7 @@ NoVoHT::NoVoHT(char * f){
 */
 NoVoHT::NoVoHT(string f,int s, int m){
    kvpairs = new kvpair*[s];
-   for (int x = 0;x<s;s++){
+   for (int x = 0;x<s;x++){
       kvpairs[x] = NULL;
    }
    magicNumber = m;
@@ -84,6 +84,7 @@ NoVoHT::~NoVoHT(){
 int NoVoHT::put(string k, string v){
    if (numEl >= size*resizeNum) {
       if (resizeNum !=0){
+         printf("Resizing\n");
          resize(size*2);
       }
    }
