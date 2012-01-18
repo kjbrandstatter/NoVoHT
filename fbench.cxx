@@ -67,13 +67,8 @@ int main(int argc, char *argv[]){
    int size = atoi(argv[1]);
    string* keys = new string[size];
    string* vals = new string[size];
-<<<<<<< HEAD
-   int i;
-   /*for (int t=0; t<size; t++){
-=======
    /*
    for (int t=0; t<size; t++){
->>>>>>> 37bed9a23ee6883f435f9ab7e865bab104bb9f11
       Package package, package_ret;
       string key = randomString(25);//as key
       package.set_virtualpath(key); 
@@ -94,23 +89,7 @@ int main(int argc, char *argv[]){
       keys[t] = randomString(KEY_LEN);
       vals[t] = randomString(VAL_LEN);
    }
-   //NoVoHT map ("", 1000000, 10000, .7);
-   //NoVoHT map ("", 1000000, -1);
-   //NoVoHT map ("/dev/shm/fbench.data", 100000000, -1);
-   for (int t=0; t<size; t++){
-      keys[t] = randomString(KEY_LEN);
-      vals[t] = randomString(VAL_LEN);
-   }
-<<<<<<< HEAD
-   NoVoHT map ("fbench.data", 1000000, 10000, .7);
-=======
-   */
-   for (int t=0; t<size; t++){
-      keys[t] = randomString(KEY_LEN);
-      vals[t] = randomString(VAL_LEN);
-   }
    NoVoHT map ("fbench.data", 1000000, 10000, -1);
->>>>>>> 37bed9a23ee6883f435f9ab7e865bab104bb9f11
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
    //NoVoHT map ("/dev/shm/fbench.data", 1000000, -1);
