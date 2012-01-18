@@ -89,7 +89,7 @@ int main(int argc, char *argv[]){
       keys[t] = randomString(KEY_LEN);
       vals[t] = randomString(VAL_LEN);
    }
-   NoVoHT map ("fbench.data", 1000000, 10000, -1);
+   NoVoHT map ("fbench.data", 1000000, 10000);
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
    //NoVoHT map ("/dev/shm/fbench.data", 1000000, -1);
