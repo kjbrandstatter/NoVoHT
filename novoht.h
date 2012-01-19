@@ -16,6 +16,8 @@ struct kvpair{
 class NoVoHT{
    int size;
    kvpair** kvpairs;
+   kvpair** oldpairs;
+   bool resizing;
    int numEl;
    FILE * dbfile;
    string filename;
