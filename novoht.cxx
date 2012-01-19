@@ -13,6 +13,8 @@ NoVoHT::NoVoHT(){
    numEl = 0;
    magicNumber = 1000;
    resizeNum = -1;
+   resizing = false;
+   oldpairs = NULL;
 }
 
 /*
@@ -45,6 +47,8 @@ NoVoHT::NoVoHT(string f,int s, int m){
    dbfile = fopen(f.c_str(), "r+");
    if (!dbfile) dbfile = fopen(f.c_str(), "w+");
    readFile();
+   resizing = false;
+   oldpairs = NULL;
 }
 NoVoHT::NoVoHT(string f,int s, int m, float r){
    kvpairs = new kvpair*[s];
@@ -60,6 +64,8 @@ NoVoHT::NoVoHT(string f,int s, int m, float r){
    dbfile = fopen(f.c_str(), "r+");
    if (!dbfile) dbfile = fopen(f.c_str(), "w+");
    readFile();
+   resizing = false;
+   oldpairs = NULL;
 }
 /*
 NoVoHT::NoVoHT(char * f, NoVoHT *map){
@@ -182,20 +188,25 @@ int NoVoHT::writeFile(){
 void NoVoHT::resize(int ns){
    int olds = size;
    size = ns;
-   kvpair** old = kvpairs;
+   oldpairs = kvpairs;
+   //resizing = true;
    kvpairs = new kvpair*[ns];
    for (int z=0; z<ns; z++) { kvpairs[z] = NULL;}
    numEl = 0;
    for (int i=0; i<olds;i++){
-      kvpair *cur = old[i];
+      kvpair *cur = oldpairs[i];
       while (cur != NULL){
-         put(cur->key, cur->val);
-         kvpair *last = cur;
+         //put(cur->key, cur->val);
+         int pos = hash(cur->key)%size;
+         kvpair * tmp = kvpairs[pos];
+         kvpairs[pos] = cur;
+         //kvpair *last = cur;
          cur = cur->next;
-         delete last;
+         kvpairs[pos]->next = tmp;
       }
    }
-   delete [] old;
+   //resizing = false;
+   delete [] oldpairs;
 }
 
 //success 0 fail -2
