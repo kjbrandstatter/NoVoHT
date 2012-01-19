@@ -48,7 +48,7 @@ double testGet(NoVoHT &map, string keys[],  string vals[], int l){
    clock_t a=clock();
    for (int t=0; t<l; t++){
       if (map.get(keys[t])->compare(vals[t]) != 0)
-         cerr << "Get Failed" << endl;
+         cout << "Get Failed" << endl;
    }
    clock_t b=clock();
    return diffclock(b,a);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]){
       vals[t] = randomString(VAL_LEN);
    }
    //NoVoHT map ("fbench.data", 1000000, 10000);
-   NoVoHT map ("fbench.data", 10000000, -1);
+   NoVoHT map ("", 10000000, -1);
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
    //NoVoHT map ("/dev/shm/fbench.data", 1000000, -1);
