@@ -23,7 +23,7 @@ while (<$input>){
          $num =0;
          if ($2 eq 'g') { $num = $1 * 1000000; }
          if ($2 eq 'm') { $num = $1 * 1000; }
-         if ($1 > $maxmem) { $maxmem = $1; }
+         if ($num > $maxmem) { $maxmem = $num; }
       }
      }
 }
