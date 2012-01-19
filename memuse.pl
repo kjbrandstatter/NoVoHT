@@ -11,7 +11,7 @@ $SIG{'HUP'} = 'interupt';
 $SIG{'TRAP'} = 'interupt';
 $SIG{'ABRT'} = 'interupt';
 $SIG{'STOP'} = 'interupt';
-if ($file ne ''){
+if (defined $file){
    open ($input, "<", $file) or die;
 }
 while (<$input>){
