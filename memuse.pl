@@ -17,7 +17,7 @@ if (defined $file){
 while (<$input>){
    if ($_ =~ $proc){
       @cols = split(' ',$_);
-      if ($cols[5] =~ m/(\d+\.?\d*)(\w?)/){
+      if ($cols[4] =~ m/(\d+\.?\d*)(\w?)/){
          print "$1$2\n";
          $num =0;
          if ($2 eq 'g') { $num = $1 * 1000000; }
