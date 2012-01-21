@@ -52,7 +52,7 @@ double testGet(NoVoHT &map, string keys[], string vals[], int l){
    for (int t=0; t<l; t++){
       if (!map.get(keys[t])) fails++;
       else if (map.get(keys[t])->compare(vals[t]) != 0)fails++;
-      if ((t+1)%1000 == 0)cout << t*100/l << "\% Complete\r";
+      if ((t+1)%1000 == 0)cout << (long)t*100/l << "\% Complete\r";
    }
    clock_t b=clock();
    cout << "100\% Complete with " << fails << " not found" << endl;
@@ -64,7 +64,7 @@ double testRemove(NoVoHT &map, string keys[], int l){
    clock_t a=clock();
    for (int t=0; t<l; t++){
       map.remove(keys[t]);
-      if ((t+1)%1000 == 0)cout << t*100/l << "\% Complete\r";
+      if ((t+1)%1000 == 0)cout << (long)t*100/l << "\% Complete\r";
    }
    clock_t b=clock();
    cout << "100\% Complete with " << fails << " not found" << endl;
@@ -99,10 +99,10 @@ int main(int argc, char *argv[]){
    for (int t=0; t<size; t++){
       keys[t] = randomString(KEY_LEN);
       vals[t] = randomString(VAL_LEN);
-      if(t%1000 == 0)cout << t*100/size << "\%\r";
+      if(t%1000 == 0)cout << (long)t*100/size << "\%\r";
    }
    cout << "Done\n" << endl;
-   NoVoHT map ("fbench.data", 1000000, 10000);
+   NoVoHT map ("fbench.data", 1000000000, 10000);
    //NoVoHT map ("", 10000000, -1);
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
