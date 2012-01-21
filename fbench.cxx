@@ -37,7 +37,7 @@ double testInsert(NoVoHT &map, string keys[], string vals[], int l){
    //clock_t a=clock();
    double a = getTime_usec();
    for (int t = 0; t<l; t++){
-      fails += map.put(keys[t], vals[t]);
+      fails -= map.put(keys[t], vals[t]);
       if ((t+1)%1000 == 0)
          cout << (long)t*100/l << "\% Complete\r";
    }
@@ -66,7 +66,7 @@ double testRemove(NoVoHT &map, string keys[], int l){
    cout << "0\% Complete\r";
    double a = getTime_usec();
    for (int t=0; t<l; t++){
-      map.remove(keys[t]);
+      fails -= map.remove(keys[t]);
       if ((t+1)%1000 == 0)cout << (long)t*100/l << "\% Complete\r";
    }
    double b = getTime_usec();
