@@ -37,7 +37,7 @@ double testInsert(NoVoHT &map, string keys[], string vals[], int l){
    clock_t a=clock();
    for (int t = 0; t<l; t++){
       fails += map.put(keys[t], vals[t]);
-      if ((t+1)%10000 == 0)cout << t*100/l << "\% Complete\r";
+      if ((t+1)%1000 == 0)cout << t*100/l << "\% Complete\r";
    }
 
    clock_t b=clock();
@@ -52,7 +52,7 @@ double testGet(NoVoHT &map, string keys[], string vals[], int l){
    for (int t=0; t<l; t++){
       if (!map.get(keys[t])) fails++;
       else if (map.get(keys[t])->compare(vals[t]) != 0)fails++;
-      if ((t+1)%10000 == 0)cout << t*100/l << "\% Complete\r";
+      if ((t+1)%1000 == 0)cout << t*100/l << "\% Complete\r";
    }
    clock_t b=clock();
    cout << "100\% Complete with " << fails << " not found" << endl;
@@ -64,7 +64,7 @@ double testRemove(NoVoHT &map, string keys[], int l){
    clock_t a=clock();
    for (int t=0; t<l; t++){
       map.remove(keys[t]);
-      if ((t+1)%10000 == 0)cout << t*100/l << "\% Complete\r";
+      if ((t+1)%1000 == 0)cout << t*100/l << "\% Complete\r";
    }
    clock_t b=clock();
    cout << "100\% Complete with " << fails << " not found" << endl;
