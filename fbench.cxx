@@ -103,7 +103,8 @@ int main(int argc, char *argv[]){
       if(t%1000 == 0)cout << (long)t*100/size << "\%\r";
    }
    cout << "Done\n" << endl;
-   NoVoHT map ("fbench.data", 1000000000, 10000);
+   //NoVoHT map ("fbench.data", 1000000000, 10000);
+   NoVoHT map ("", 1000000000, -1);
    //NoVoHT map ("", 10000000, -1);
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
