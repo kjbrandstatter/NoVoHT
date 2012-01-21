@@ -37,7 +37,7 @@ double testInsert(NoVoHT &map, string keys[], string vals[], int l){
    clock_t a=clock();
    for (int t = 0; t<l; t++){
       fails += map.put(keys[t], vals[t]);
-      if ((t+1)%1000 == 0)cout << t*100/l << "\% Complete\r";
+      if ((t+1)%1000 == 0)(long)cout << t*100/l << "\% Complete\r";
    }
 
    clock_t b=clock();
