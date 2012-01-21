@@ -34,42 +34,44 @@ double testInsert(NoVoHT &map, string keys[], string vals[], int l){
    int fails =0;
    cout << "0\% Complete\r";
    cout.flush();
-   clock_t a=clock();
+   //clock_t a=clock();
+   double a = getTime_usec();
    for (int t = 0; t<l; t++){
       fails += map.put(keys[t], vals[t]);
       if ((t+1)%1000 == 0)
          cout << (long)t*100/l << "\% Complete\r";
    }
-
-   clock_t b=clock();
+   double b = getTime_usec();
+   //clock_t b=clock();
    cout << "100\% Complete with " << fails << " not inserted" << endl;
-   return diffclock(b,a);
+   //return diffclock(b,a);
+   return (b-a);
    ;
 }
 double testGet(NoVoHT &map, string keys[], string vals[], int l){
    int fails = 0;
    cout << "0\% Complete\r";
-   clock_t a=clock();
+   double a = getTime_usec();
    for (int t=0; t<l; t++){
       if (!map.get(keys[t])) fails++;
       else if (map.get(keys[t])->compare(vals[t]) != 0)fails++;
       if ((t+1)%1000 == 0)cout << (long)t*100/l << "\% Complete\r";
    }
-   clock_t b=clock();
+   double b = getTime_usec();
    cout << "100\% Complete with " << fails << " not found" << endl;
-   return diffclock(b,a);
+   return b-a;
 }
 double testRemove(NoVoHT &map, string keys[], int l){
    int fails = 0;
    cout << "0\% Complete\r";
-   clock_t a=clock();
+   double a = getTime_usec();
    for (int t=0; t<l; t++){
       map.remove(keys[t]);
       if ((t+1)%1000 == 0)cout << (long)t*100/l << "\% Complete\r";
    }
-   clock_t b=clock();
+   double b = getTime_usec();
    cout << "100\% Complete with " << fails << " not found" << endl;
-   return diffclock(b,a);
+   return b-a;
 }
 int main(int argc, char *argv[]){
    cout << "\nInitializing key-value pairs for testing\n";
@@ -107,7 +109,7 @@ int main(int argc, char *argv[]){
    char c[40];
    sprintf(c, "cat /proc/%d/status | grep VmPeak", (int)getpid());
    system(c);
-   NoVoHT map ("fbench.data", 1000000000, -1);
+   NoVoHT map ("fbench.data", 1000000, -1);
    //NoVoHT map ("", 10000000, -1);
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
@@ -119,9 +121,9 @@ int main(int argc, char *argv[]){
    ret = testGet(map,keys,vals,size);
    cout << "Testing Removal: Removing " << size << " elements" << endl;
    rem = testRemove(map,keys,size);
-   cout << "\nInsertion done in " << ins << " milliseconds" << endl;
-   cout << "Retrieval done in " << ret << " milliseconds" << endl;
-   cout << "Removal done in " << rem << " milliseconds" << endl;
+   cout << "\nInsertion done in " << ins << " microseconds" << endl;
+   cout << "Retrieval done in " << ret << " microseconds" << endl;
+   cout << "Removal done in " << rem << " microseconds" << endl;
    system(c);
    delete [] keys;
    delete [] vals;
