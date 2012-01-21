@@ -104,7 +104,7 @@ int main(int argc, char *argv[]){
    }
    cout << "Done\n" << endl;
    //NoVoHT map ("fbench.data", 1000000000, 10000);
-   char c[10];
+   char c[40];
    sprintf(c, "cat /proc/%d/status | grep VmPeak", (int)getpid());
    system(c);
    NoVoHT map ("fbench.data", 1000000000, -1);
