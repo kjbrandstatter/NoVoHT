@@ -239,6 +239,7 @@ void NoVoHT::readFile(){
    while(fscanf(dbfile, "%s", s) != EOF){
       string key(s);
       fscanf(dbfile,"%s\t",s);
+      if (!s) break;
       string val(s);
       if (key[0] != '~'){
          put(key,val);
