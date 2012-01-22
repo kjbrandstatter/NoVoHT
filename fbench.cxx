@@ -53,8 +53,9 @@ double testGet(NoVoHT &map, string keys[], string vals[], int l){
    cout << "0\% Complete\r";
    double a = getTime_usec();
    for (int t=0; t<l; t++){
-      if (!map.get(keys[t])) fails++;
-      else if (map.get(keys[t])->compare(vals[t]) != 0)fails++;
+      string* s = map.get(keys[t]);
+      if (!s) fails++;
+      else if (s->compare(vals[t]) != 0)fails++;
       if ((t+1)%1000 == 0)cout << (long)t*100/l << "\% Complete\r";
    }
    double b = getTime_usec();
