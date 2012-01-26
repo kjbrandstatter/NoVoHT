@@ -38,6 +38,7 @@ NoVoHT::NoVoHT(string f,int s, int m){
    for (int x = 0;x<s;x++){
       kvpairs[x] = NULL;
    }
+   resizing=false;
    magicNumber = m;
    nRem = 0;
    resizeNum = 0;
@@ -47,7 +48,6 @@ NoVoHT::NoVoHT(string f,int s, int m){
    dbfile = fopen(f.c_str(), "r+");
    if (!dbfile) dbfile = fopen(f.c_str(), "w+");
    readFile();
-   resizing = false;
    oldpairs = NULL;
 }
 NoVoHT::NoVoHT(string f,int s, int m, float r){
@@ -55,6 +55,7 @@ NoVoHT::NoVoHT(string f,int s, int m, float r){
    for (int x = 0;x<s;x++){
       kvpairs[x] = NULL;
    }
+   resizing=false;
    magicNumber = m;
    nRem = 0;
    resizeNum = r;
@@ -64,7 +65,6 @@ NoVoHT::NoVoHT(string f,int s, int m, float r){
    dbfile = fopen(f.c_str(), "r+");
    if (!dbfile) dbfile = fopen(f.c_str(), "w+");
    readFile();
-   resizing = false;
    oldpairs = NULL;
 }
 /*
@@ -77,7 +77,7 @@ NoVoHT::NoVoHT(char * f, NoVoHT *map){
 }*/
 NoVoHT::~NoVoHT(){
    if (dbfile){
-      //writeFile();
+      writeFile();
       fclose(dbfile);
    }
    for (int i = 0; i < size; i++){
@@ -250,7 +250,6 @@ void NoVoHT::readFile(){
       if (key[0] != '~'){
          put(key,val);
       }
-         cout << key << ":" << val << endl;
    }
    writeFile();
 }
