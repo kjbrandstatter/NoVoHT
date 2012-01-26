@@ -77,7 +77,7 @@ NoVoHT::NoVoHT(char * f, NoVoHT *map){
 }*/
 NoVoHT::~NoVoHT(){
    if (dbfile){
-      //writeFile();
+      writeFile();
       fclose(dbfile);
    }
    for (int i = 0; i < size; i++){
@@ -88,6 +88,7 @@ NoVoHT::~NoVoHT(){
 
 //0 success, -1 no insert, -2 no write
 int NoVoHT::put(string k, string v){
+   while(resizing){ /* Wait till done */}
    if (numEl >= size*resizeNum) {
       if (resizeNum !=0){
          printf("Resizing\n");
@@ -117,6 +118,7 @@ int NoVoHT::put(string k, string v){
 }
 
 string* NoVoHT::get(string k){
+   while(resizing){ /* Wait till done */}
    int loc = hash(k)%size;
    kvpair *cur = kvpairs[loc];
    while (cur != NULL && !k.empty()){
@@ -128,6 +130,7 @@ string* NoVoHT::get(string k){
 
 //return 0 for success, -1 fail to remove, -2+ write failure
 int NoVoHT::remove(string k){
+   while(resizing){ /* Wait till done */}
    int ret =0;
    int loc = hash(k)%size;
    kvpair *cur = kvpairs[loc];
@@ -164,9 +167,6 @@ int NoVoHT::remove(string k){
 int NoVoHT::writeFile(){
    int ret =0;
    if (!dbfile)return (filename.compare("") == 0 ? 0 : -2);
-   //fclose(dbfile);
-   //dbfile = fopen(filename.c_str(), "w+");
-   //dbfile = freopen(filename.c_str(), "w+", dbfile);
    rewind(dbfile);
    for (int i=0; i<size;i++){
       kvpair *cur = kvpairs[i];
@@ -179,7 +179,6 @@ int NoVoHT::writeFile(){
       }
    }
    truncate(filename.c_str(), (off_t)SEEK_CUR-SEEK_SET-1);
-   //fclose(out);
    return ret;
 }
 
@@ -189,35 +188,31 @@ void NoVoHT::resize(int ns){
    int olds = size;
    size = ns;
    oldpairs = kvpairs;
-   //resizing = true;
+   resizing = true;
    kvpairs = new kvpair*[ns];
    for (int z=0; z<ns; z++) { kvpairs[z] = NULL;}
    numEl = 0;
    for (int i=0; i<olds;i++){
       kvpair *cur = oldpairs[i];
       while (cur != NULL){
-         //put(cur->key, cur->val);
          int pos = hash(cur->key)%size;
          kvpair * tmp = kvpairs[pos];
          kvpairs[pos] = cur;
-         //kvpair *last = cur;
          cur = cur->next;
          kvpairs[pos]->next = tmp;
       }
    }
-   //resizing = false;
+   resizing = false;
    delete [] oldpairs;
 }
 
 //success 0 fail -2
 //write kvpair to file
 int NoVoHT::write(kvpair * p){
-   //FILE * data = fopen(file.c_str(), "a");
    if (!dbfile)return (filename.compare("") == 0 ? 0 : -2);
    fseek(dbfile, 0, SEEK_END);
    fgetpos(dbfile, &(p->pos));
    fprintf(dbfile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
-   //fclose(data);
    return 0;
 }
 
@@ -225,10 +220,8 @@ int NoVoHT::write(kvpair * p){
 //mark line in file for deletion
 int NoVoHT::mark(fpos_t position){
    if (!dbfile)return (filename.compare("") == 0 ? 0 : -2);
-   //FILE * data = fopen(file.c_str(), "r+");
    fsetpos(dbfile, &position);
    fputc((int) '~', dbfile);
-   //fclose(data);
    return 0;
 }
 char *readTabString(FILE *file, char *buffer){
@@ -248,8 +241,6 @@ char *readTabString(FILE *file, char *buffer){
 
 void NoVoHT::readFile(){
    if(!dbfile) return;
-   //FILE * data = fopen(file.c_str(), "r+");
-   //char s[300];
    char s[300];
    while(readTabString(dbfile, s) != NULL){
       string key(s);
@@ -260,7 +251,6 @@ void NoVoHT::readFile(){
       }
          cout << key << ":" << val << endl;
    }
-   //fclose(data);
    writeFile();
 }
 

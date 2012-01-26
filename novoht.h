@@ -48,4 +48,6 @@ class NoVoHT{
 unsigned long long hash (string k);
 
 void fsu(kvpair *);
+
+char *readTabString(FILE*, char*);
 #endif
