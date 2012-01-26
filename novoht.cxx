@@ -231,15 +231,29 @@ int NoVoHT::mark(fpos_t position){
    //fclose(data);
    return 0;
 }
+char *readTabString(FILE *file, char *buffer){
+   int n =0;
+   char t;
+   while((t=fgetc(file)) != EOF){
+      if (t == '\t') {
+         buffer[n] = '\0';
+         return buffer;
+      }
+      buffer[n] = t;
+      n++;
+   }
+   buffer[n] = '\0';
+   return (n == 0 ? NULL : buffer);
+}
 
 void NoVoHT::readFile(){
    if(!dbfile) return;
    //FILE * data = fopen(file.c_str(), "r+");
    //char s[300];
    char s[300];
-   while(fscanf(dbfile, "%[^\n\t]\t", s) != EOF){
+   while(readTabString(dbfile, s) != NULL){
       string key(s);
-      if (fscanf(dbfile, "%[^\n\t]\t", s) == EOF) break;
+      if (readTabString(dbfile, s) == NULL) break;
       string val(s);
       if (key[0] != '~'){
          put(key,val);
