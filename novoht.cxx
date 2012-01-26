@@ -77,7 +77,7 @@ NoVoHT::NoVoHT(char * f, NoVoHT *map){
 }*/
 NoVoHT::~NoVoHT(){
    if (dbfile){
-      writeFile();
+      //writeFile();
       fclose(dbfile);
    }
    for (int i = 0; i < size; i++){
@@ -242,10 +242,11 @@ char *readTabString(FILE *file, char *buffer){
 void NoVoHT::readFile(){
    if(!dbfile) return;
    char s[300];
+   char v[300];
    while(readTabString(dbfile, s) != NULL){
       string key(s);
-      if (readTabString(dbfile, s) == NULL) break;
-      string val(s);
+      if (readTabString(dbfile, v) == NULL) break;
+      string val(v);
       if (key[0] != '~'){
          put(key,val);
       }
