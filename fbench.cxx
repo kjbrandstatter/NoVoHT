@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <cstddef>
 #include <sys/time.h>//
-//#include "meta.pb.h"
+#include "meta.pb.h"
 #define KEY_LEN 32
 #define VAL_LEN 128
 using namespace std;
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]){
    int size = atoi(argv[1]);
    string* keys = new string[size];
    string* vals = new string[size];
-   /*for (int t=0;
+   for (int t=0;
      t<size;
      t++){
      Package package, package_ret;
@@ -99,12 +99,13 @@ int main(int argc, char *argv[]){
    keys[t] = key;
    vals[t] = value;
    }
-   */
+   /*
    for (int t=0; t<size; t++){
       keys[t] = randomString(KEY_LEN);
       vals[t] = randomString(VAL_LEN);
       if(t%1000 == 0)cout << (long)t*100/size << "\%\r";
    }
+   */
    cout << "Done\n" << endl;
    //NoVoHT map ("fbench.data", 1000000000, 10000);
    char c[40];

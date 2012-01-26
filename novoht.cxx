@@ -77,7 +77,7 @@ NoVoHT::NoVoHT(char * f, NoVoHT *map){
 }*/
 NoVoHT::~NoVoHT(){
    if (dbfile){
-      writeFile();
+      //writeFile();
       fclose(dbfile);
    }
    for (int i = 0; i < size; i++){
@@ -167,18 +167,18 @@ int NoVoHT::writeFile(){
    //fclose(dbfile);
    //dbfile = fopen(filename.c_str(), "w+");
    //dbfile = freopen(filename.c_str(), "w+", dbfile);
-   fseek(dbfile, 0,SEEK_CUR);
+   rewind(dbfile);
    for (int i=0; i<size;i++){
       kvpair *cur = kvpairs[i];
       while (cur != NULL){
          if(!cur->key.empty() && !cur->val.empty()){
                 fgetpos(dbfile, &(cur->pos));
-                fprintf(dbfile, "%s\t%s\n", cur->key.c_str(), cur->val.c_str());
+                fprintf(dbfile, "%s\t%s\t", cur->key.c_str(), cur->val.c_str());
          }
          cur = cur->next;
       }
    }
-   ftruncate(fileno(dbfile), (off_t)SEEK_CUR-SEEK_SET-1);
+   truncate(filename.c_str(), (off_t)SEEK_CUR-SEEK_SET-1);
    //fclose(out);
    return ret;
 }
@@ -235,15 +235,16 @@ int NoVoHT::mark(fpos_t position){
 void NoVoHT::readFile(){
    if(!dbfile) return;
    //FILE * data = fopen(file.c_str(), "r+");
+   //char s[300];
    char s[300];
-   while(fscanf(dbfile, "%s", s) != EOF){
+   while(fscanf(dbfile, "%[^\n\t]\t", s) != EOF){
       string key(s);
-      fscanf(dbfile,"%s\t",s);
-      if (!s) break;
+      if (fscanf(dbfile, "%[^\n\t]\t", s) == EOF) break;
       string val(s);
       if (key[0] != '~'){
          put(key,val);
       }
+         cout << key << ":" << val << endl;
    }
    //fclose(data);
    writeFile();
