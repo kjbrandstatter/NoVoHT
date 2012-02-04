@@ -21,6 +21,10 @@ kbench: novoht.o kbench.cxx
 tonybench: novoht.o test_hash.cpp
 	$(CC) novoht.o test_hash.cpp -o tonybench
 
+libnovoht: novoht.cxx
+	g++ $(CFLAGS) -fPIC -o novoht.o novoht.cxx
+	g++ -shared -o libnovoht.so novoht.o
+
 novoht.o: novoht.cxx
 	$(CC) $(CFLAGS) novoht.cxx
 
