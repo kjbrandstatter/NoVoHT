@@ -10,6 +10,9 @@ BINS=kbench tonybench fbench
 all: $(BINS)
 
 fbench: novoht.o fbench.cxx
+	$(CC) novoht.o fbench.cxx -o fbench
+
+gpbbench: novoht.o gpbbench.cxx
 	$(CC) novoht.o fbench.cxx -o fbench -lz -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc meta.pb.cc
 
 kbench: novoht.o kbench.cxx
