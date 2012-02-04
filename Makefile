@@ -13,7 +13,7 @@ fbench: novoht.o fbench.cxx
 	$(CC) novoht.o fbench.cxx -o fbench
 
 gpbbench: novoht.o gpbbench.cxx
-	$(CC) novoht.o fbench.cxx -o fbench -lz -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc meta.pb.cc
+	$(CC) novoht.o gpbbench.cxx -o gpbbench -lz -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc meta.pb.cc
 
 kbench: novoht.o kbench.cxx
 	$(CC) novoht.o kbench.cxx -o kbench
@@ -22,8 +22,9 @@ tonybench: novoht.o test_hash.cpp
 	$(CC) novoht.o test_hash.cpp -o tonybench
 
 libnovoht: novoht.cxx
-	g++ $(CFLAGS) -fPIC -o novoht.o novoht.cxx
-	g++ -shared -o libnovoht.so novoht.o
+	g++ $(CFLAGS) -fPIC -o novoht.obj novoht.cxx
+	g++ -shared -o libnovoht.so novoht.obj
+	rm novoht.obj
 
 novoht.o: novoht.cxx
 	$(CC) $(CFLAGS) novoht.cxx
