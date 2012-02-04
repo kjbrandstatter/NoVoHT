@@ -10,6 +10,9 @@ BINS=kbench tonybench fbench
 all: $(BINS)
 
 fbench: novoht.o fbench.cxx
+	$(CC) novoht.o fbench.cxx -o fbench
+
+gpbbench: novoht.o gpbbench.cxx
 	$(CC) novoht.o fbench.cxx -o fbench -lz -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc meta.pb.cc
 
 kbench: novoht.o kbench.cxx
@@ -17,6 +20,10 @@ kbench: novoht.o kbench.cxx
 
 tonybench: novoht.o test_hash.cpp
 	$(CC) novoht.o test_hash.cpp -o tonybench
+
+libnovoht: novoht.cxx
+	g++ $(CFLAGS) -fPIC -o novoht.o novoht.cxx
+	g++ -shared -o libnovoht.so novoht.o
 
 novoht.o: novoht.cxx
 	$(CC) $(CFLAGS) novoht.cxx
