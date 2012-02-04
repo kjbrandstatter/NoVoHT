@@ -80,24 +80,23 @@ int main(int argc, char *argv[]){
    int size = atoi(argv[1]);
    string* keys = new string[size];
    string* vals = new string[size];
-   for (int t=0;
-     t<size;
-     t++){
-     Package package, package_ret;
-     string key = randomString(25);
-   //as keypackage.set_virtualpath(key);
-   package.set_isdir(true);
-   package.set_replicano(5);
-   package.set_operation(3);
-   package.set_realfullpath("Some-Real-longer-longer-and-longer-Paths--------");
-   package.add_listitem("item-----1");
-   package.add_listitem("item-----2");
-   package.add_listitem("item-----3");
-   package.add_listitem("item-----4");
-   package.add_listitem("item-----5");
-   string value = package.SerializeAsString();
-   keys[t] = key;
-   vals[t] = value;
+   for (int t=0; t<size; t++){
+      Package package, package_ret;
+      string key = randomString(25);
+      //as keypackage.set_virtualpath(key);
+      package.set_isdir(true);
+      package.set_replicano(5);
+      package.set_operation(3);
+      package.set_realfullpath("Some-Real-longer-longer-and-longer-Paths--------");
+      package.add_listitem("item-----1");
+      package.add_listitem("item-----2");
+      package.add_listitem("item-----3");
+      package.add_listitem("item-----4");
+      package.add_listitem("item-----5");
+      string value = package.SerializeAsString();
+      keys[t] = key;
+      vals[t] = value;
+      if(t%1000 == 0)cout << (long)t*100/size << "\%\r";
    }
    /*
    for (int t=0; t<size; t++){
@@ -111,7 +110,7 @@ int main(int argc, char *argv[]){
    char c[40];
    sprintf(c, "cat /proc/%d/status | grep VmPeak", (int)getpid());
    system(c);
-   NoVoHT map ("fbench.data", size, -1);
+   NoVoHT map ("fbench.data", size/2, -1, 2);
    //NoVoHT map ("", 10000000, -1);
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
