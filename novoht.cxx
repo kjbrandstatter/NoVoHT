@@ -91,7 +91,6 @@ int NoVoHT::put(string k, string v){
    while(resizing){ /* Wait till done */}
    if (numEl >= size*resizeNum) {
       if (resizeNum !=0){
-         printf("Resizing\n");
          resize(size*2);
       }
    }
