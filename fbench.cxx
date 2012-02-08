@@ -1,6 +1,7 @@
 #include <iostream>
 #include "time.h"
 #include <string>
+#include <unistd.h>
 #include "novoht.h"
 #include <cstdlib>
 #include <cstddef>
@@ -35,7 +36,8 @@ double testInsert(NoVoHT &map, string keys[], string vals[], int l){
    cout.flush();
    //clock_t a=clock();
    double a = getTime_usec();
-   for (int t = 0; t<l; t++){
+   int t;
+   for (t = 0; t<l-1; t++){
       fails -= map.put(keys[t], vals[t]);
       if ((t+1)%1000 == 0)
          cout << (long)t*100/l << "\% Complete\r";
