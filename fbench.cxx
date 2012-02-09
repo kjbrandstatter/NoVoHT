@@ -37,7 +37,7 @@ double testInsert(NoVoHT &map, string keys[], string vals[], int l){
    //clock_t a=clock();
    double a = getTime_usec();
    int t;
-   for (t = 0; t<l-1; t++){
+   for (t = 0; t<l; t++){
       fails -= map.put(keys[t], vals[t]);
       if ((t+1)%1000 == 0)
          cout << (long)t*100/l << "\% Complete\r";

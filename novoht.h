@@ -18,6 +18,8 @@ class NoVoHT{
    kvpair** kvpairs;
    kvpair** oldpairs;
    bool resizing;
+   bool map_lock;
+   bool write_lock;
    int numEl;
    FILE * dbfile;
    string filename;
