@@ -11,6 +11,7 @@
 #define VAL_LEN 128
 using namespace std;
 struct timeval tp;
+NoVoHT *pmap;
 
 double getTime_usec() {
    gettimeofday(&tp, NULL);
@@ -35,8 +36,26 @@ struct ipair{
 
 void* insert(void* args){
    struct ipair theargs = *((ipair*)args);
-      (theargs.map)->put(theargs.key,theargs.val);
+      //(theargs.map)->put(theargs.key,theargs.val);
+   pmap->put(theargs.key,theargs.val);
 }
+
+void* get(void* args){
+   struct ipair theargs = *((ipair*)args);
+   string* ret = pmap->get(theargs.key);
+   if(ret)
+      if(ret->compare(theargs.val)){
+         cout<< "Found" << endl;
+         pthread_exit(NULL);
+      }
+   cerr << "lookup failure" << endl;
+}
+
+void* remove(void* argv){
+   struct ipair args = *((ipair*)argv);
+   pmap->remove(args.key);
+}
+
 int main(int argc, char** argv){
    int size = atoi(argv[1]);
    string* keys = new string[size];
@@ -48,10 +67,10 @@ int main(int argc, char** argv){
    }
    const char* fname = "";
    if (argc >2) fname = argv[2];
-   NoVoHT map (fname, size, -1);
+   pmap = new NoVoHT(fname, size, -1);
    for (int i=0; i<size; i++){
       struct ipair args;
-      args.map = &map;
+      args.map = pmap;
       args.key = keys[i];
       args.val = vals[i];
       int rc;
@@ -62,11 +81,31 @@ int main(int argc, char** argv){
    for (int z =0; z <size; z++){
       pthread_join(threads[z], NULL);
    }
-   for (int z =0; z < size; z++){
-      if(map.get(keys[z]) == NULL)
-         exit(1);
-      if(map.get(keys[z])->compare(vals[z]) == false)
-         exit(1);
+   for (int i=0; i<size; i++){
+      struct ipair args;
+      args.map = pmap;
+      args.key = keys[i];
+      args.val = vals[i];
+      int rc;
+      rc = pthread_create(&threads[i], NULL, get, (void *)&args);
+      if (rc)
+         cout << "Failed: " << rc << endl;
+   }
+   for (int z =0; z <size; z++){
+      pthread_join(threads[z], NULL);
+   }
+   for (int i=0; i<size; i++){
+      struct ipair args;
+      args.map = pmap;
+      args.key = keys[i];
+      args.val = vals[i];
+      int rc;
+      rc = pthread_create(&threads[i], NULL, remove, (void *)&args);
+      if (rc)
+         cout << "Failed: " << rc << endl;
+   }
+   for (int z =0; z <size; z++){
+      pthread_join(threads[z], NULL);
    }
    return 0;
 }
