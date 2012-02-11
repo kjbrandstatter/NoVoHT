@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "novoht.h"
 #include <sys/time.h>
+#include <sys/shm.h>
 #define KEY_LEN 32
 #define VAL_LEN 128
 using namespace std;
@@ -29,34 +30,43 @@ string randomString(int len) {
    return s;
 }
 struct ipair{
-   NoVoHT *map;
+   int shmid;
    string key;
    string val;
 };
 
 void* insert(void* args){
    struct ipair theargs = *((ipair*)args);
+   NoVoHT *map = (NoVoHT*)shmat(theargs.shmid,0,0);
       //(theargs.map)->put(theargs.key,theargs.val);
-   pmap->put(theargs.key,theargs.val);
+   map->put(theargs.key,theargs.val);
+   pthread_exit(NULL);
 }
 
 void* get(void* args){
    struct ipair theargs = *((ipair*)args);
-   string* ret = pmap->get(theargs.key);
+   NoVoHT *map = (NoVoHT*)shmat(theargs.shmid,0,0);
+   string* ret = map->get(theargs.key);
    if(ret)
       if(ret->compare(theargs.val)){
          cout<< "Found" << endl;
          pthread_exit(NULL);
       }
-   cerr << "lookup failure" << endl;
+      else{ cerr << "No match" << endl;}
+   else
+        cerr << "lookup failure" << endl;
+   pthread_exit(NULL);
 }
 
 void* remove(void* argv){
    struct ipair args = *((ipair*)argv);
-   pmap->remove(args.key);
+   NoVoHT *map = (NoVoHT*)shmat(args.shmid,0,0);
+   map->remove(args.key);
+   pthread_exit(NULL);
 }
 
 int main(int argc, char** argv){
+   int shmid = shmget(1000, 10*sizeof(NoVoHT), IPC_CREAT);
    int size = atoi(argv[1]);
    string* keys = new string[size];
    string* vals = new string[size];
@@ -67,10 +77,11 @@ int main(int argc, char** argv){
    }
    const char* fname = "";
    if (argc >2) fname = argv[2];
+   pmap = (NoVoHT*)shmat(shmid,0,0);
    pmap = new NoVoHT(fname, size, -1);
    for (int i=0; i<size; i++){
       struct ipair args;
-      args.map = pmap;
+      args.shmid = shmid;
       args.key = keys[i];
       args.val = vals[i];
       int rc;
@@ -83,7 +94,7 @@ int main(int argc, char** argv){
    }
    for (int i=0; i<size; i++){
       struct ipair args;
-      args.map = pmap;
+      args.shmid = shmid;
       args.key = keys[i];
       args.val = vals[i];
       int rc;
@@ -96,7 +107,7 @@ int main(int argc, char** argv){
    }
    for (int i=0; i<size; i++){
       struct ipair args;
-      args.map = pmap;
+      args.shmid = shmid;
       args.key = keys[i];
       args.val = vals[i];
       int rc;
@@ -107,5 +118,8 @@ int main(int argc, char** argv){
    for (int z =0; z <size; z++){
       pthread_join(threads[z], NULL);
    }
+   delete [] keys;
+   delete [] vals;
+   delete pmap;
    return 0;
 }
