@@ -39,5 +39,8 @@ clean:
 
 rebuild: clean
 
-test: kbench
-	./kbench
+test_fbench: fbench
+	./fbench 1000000 fbench.data
+
+test_pbench: pbench
+	./pbench 4096 pbench.data
