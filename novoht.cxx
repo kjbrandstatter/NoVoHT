@@ -96,7 +96,7 @@ NoVoHT::~NoVoHT(){
 //0 success, -1 no insert, -2 no write
 int NoVoHT::put(string k, string v){
    //while(resizing || map_lock){ /* Wait till done */}
-   while(map_lock){ }
+   //while(map_lock){ }
    map_lock=true;
    if (numEl >= size*resizeNum) {
       if (resizeNum !=0){

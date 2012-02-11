@@ -12,7 +12,6 @@
 #define VAL_LEN 128
 using namespace std;
 struct timeval tp;
-NoVoHT *pmap;
 
 double getTime_usec() {
    gettimeofday(&tp, NULL);
@@ -30,43 +29,51 @@ string randomString(int len) {
    return s;
 }
 struct ipair{
-   int shmid;
+   NoVoHT *map;
    string key;
    string val;
 };
 
-void* insert(void* args){
-   struct ipair theargs = *((ipair*)args);
-   NoVoHT *map = (NoVoHT*)shmat(theargs.shmid,0,0);
+void* insert(void* theargs){
+   struct ipair args = *((ipair*)theargs);
+   NoVoHT *map = args.map;
       //(theargs.map)->put(theargs.key,theargs.val);
-   map->put(theargs.key,theargs.val);
+   int stat;
+   if((stat=map->put(args.key,args.val)) == 0)
+      cout << "Insert" << endl;
+   else
+      cerr << "InsertFailure with " << stat << args.key<< endl;
    pthread_exit(NULL);
 }
 
-void* get(void* args){
-   struct ipair theargs = *((ipair*)args);
-   NoVoHT *map = (NoVoHT*)shmat(theargs.shmid,0,0);
-   string* ret = map->get(theargs.key);
-   if(ret)
-      if(ret->compare(theargs.val)){
+void* get(void* theargs){
+   struct ipair args = *((ipair*)theargs);
+   NoVoHT *map = args.map;
+   string* ret = map->get(args.key);
+   if(ret){
+      if(ret->compare(args.val) == 0){
          cout<< "Found" << endl;
          pthread_exit(NULL);
       }
-      else{ cerr << "No match" << endl;}
+      else{ cerr << "key doesn't match" << endl;}
+   }
    else
-        cerr << "lookup failure" << endl;
+        cerr << "Key not found" << args.key<< endl;
    pthread_exit(NULL);
 }
 
 void* remove(void* argv){
    struct ipair args = *((ipair*)argv);
-   NoVoHT *map = (NoVoHT*)shmat(args.shmid,0,0);
-   map->remove(args.key);
+   NoVoHT *map = args.map;
+   int stat;
+   if((stat=map->remove(args.key)) == 0)
+      cout << "Removed" << endl;
+   else
+      cerr << "RemoveErr " << stat <<endl;
    pthread_exit(NULL);
 }
 
 int main(int argc, char** argv){
-   int shmid = shmget(1000, 10*sizeof(NoVoHT), IPC_CREAT);
    int size = atoi(argv[1]);
    string* keys = new string[size];
    string* vals = new string[size];
@@ -77,47 +84,52 @@ int main(int argc, char** argv){
    }
    const char* fname = "";
    if (argc >2) fname = argv[2];
-   pmap = (NoVoHT*)shmat(shmid,0,0);
-   pmap = new NoVoHT(fname, size, -1);
+   NoVoHT *pmap = new NoVoHT(fname,size,-1);
+   struct ipair args[size];
+   //pmap = new NoVoHT(fname, size, -1);
+   double pointA = getTime_usec();
    for (int i=0; i<size; i++){
-      struct ipair args;
-      args.shmid = shmid;
-      args.key = keys[i];
-      args.val = vals[i];
+      args[i].map = pmap;
+      args[i].key = keys[i];
+      args[i].val = vals[i];
       int rc;
-      rc = pthread_create(&threads[i], NULL, insert, (void *)&args);
+      rc = pthread_create(&threads[i], NULL, insert, (void *)&args[i]);
       if (rc)
          cout << "Failed: " << rc << endl;
    }
    for (int z =0; z <size; z++){
       pthread_join(threads[z], NULL);
    }
+   double pointB = getTime_usec();
    for (int i=0; i<size; i++){
-      struct ipair args;
-      args.shmid = shmid;
-      args.key = keys[i];
-      args.val = vals[i];
+      args[i].map = pmap;
+      args[i].key = keys[i];
+      args[i].val = vals[i];
       int rc;
-      rc = pthread_create(&threads[i], NULL, get, (void *)&args);
+      rc = pthread_create(&threads[i], NULL, get, (void *)&args[i]);
       if (rc)
          cout << "Failed: " << rc << endl;
    }
    for (int z =0; z <size; z++){
       pthread_join(threads[z], NULL);
    }
+   double pointC = getTime_usec();
    for (int i=0; i<size; i++){
-      struct ipair args;
-      args.shmid = shmid;
-      args.key = keys[i];
-      args.val = vals[i];
+      args[i].map = pmap;
+      args[i].key = keys[i];
+      args[i].val = vals[i];
       int rc;
-      rc = pthread_create(&threads[i], NULL, remove, (void *)&args);
+      rc = pthread_create(&threads[i], NULL, remove, (void *)&args[i]);
       if (rc)
          cout << "Failed: " << rc << endl;
    }
    for (int z =0; z <size; z++){
       pthread_join(threads[z], NULL);
    }
+   double pointD = getTime_usec();
+   cout << "Insert time: " << pointB-pointA << endl;
+   cout << "Retrieve time: " << pointC-pointB << endl;
+   cout << "Remove time: " << pointD-pointC << endl;
    delete [] keys;
    delete [] vals;
    delete pmap;
