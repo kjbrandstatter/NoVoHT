@@ -128,7 +128,7 @@ int NoVoHT::put(string k, string v){
 }
 
 string* NoVoHT::get(string k){
-   while(resizing){ /* Wait till done */}
+   while(map_lock){ /* Wait till done */}
    int loc = hash(k)%size;
    kvpair *cur = kvpairs[loc];
    while (cur != NULL && !k.empty()){
