@@ -111,7 +111,9 @@ int main(int argc, char *argv[]){
    char c[40];
    sprintf(c, "cat /proc/%d/status | grep VmPeak", (int)getpid());
    system(c);
-   NoVoHT map ("", size/2, -1);
+   const char* fn = "";
+   if(argc > 2) fn = argv[2];
+   NoVoHT map (fn, size, -1);
    //NoVoHT map ("", 10000000, -1);
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
