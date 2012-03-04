@@ -246,7 +246,7 @@ int NoVoHT::mark(fpos_t position){
 char *readTabString(FILE *file, char *buffer){
    int n =0;
    char t;
-   while((t=fgetc(file)) != EOF){
+   while((t=fgetc(file)) != EOF && n < 300){
       if (t == '\t') {
          buffer[n] = '\0';
          return buffer;
