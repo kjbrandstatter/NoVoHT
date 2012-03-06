@@ -180,6 +180,7 @@ int NoVoHT::writeFile(){
    write_lock=true;
    int ret =0;
    rewind(dbfile);
+   ftruncate(fileno(dbfile), 0);
    for (int i=0; i<size;i++){
       kvpair *cur = kvpairs[i];
       while (cur != NULL){
@@ -190,7 +191,6 @@ int NoVoHT::writeFile(){
          cur = cur->next;
       }
    }
-   truncate(filename.c_str(), (off_t)SEEK_CUR-SEEK_SET-1);
    write_lock=false;
    return ret;
 }
