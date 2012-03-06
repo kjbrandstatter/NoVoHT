@@ -84,7 +84,7 @@ NoVoHT::NoVoHT(char * f, NoVoHT *map){
 }*/
 NoVoHT::~NoVoHT(){
    if (dbfile){
-      //writeFile();
+      writeFile();
       fclose(dbfile);
    }
    for (int i = 0; i < size; i++){
