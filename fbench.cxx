@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstddef>
 #include <sys/time.h>//
+#include <sys/stat.h>
 #define KEY_LEN 32
 #define VAL_LEN 128
 using namespace std;
@@ -81,50 +82,44 @@ int main(int argc, char *argv[]){
    int size = atoi(argv[1]);
    string* keys = new string[size];
    string* vals = new string[size];
-   /*
-   for (int t=0; t<size; t++){
-      Package package, package_ret;
-      string key = randomString(25);
-      //as keypackage.set_virtualpath(key);
-      package.set_isdir(true);
-      package.set_replicano(5);
-      package.set_operation(3);
-      package.set_realfullpath("Some-Real-longer-longer-and-longer-Paths--------");
-      package.add_listitem("item-----1");
-      package.add_listitem("item-----2");
-      package.add_listitem("item-----3");
-      package.add_listitem("item-----4");
-      package.add_listitem("item-----5");
-      string value = package.SerializeAsString();
-      keys[t] = key;
-      vals[t] = value;
-      if(t%1000 == 0)cout << (long)t*100/size << "\%\r";
-   }
-   */
    for (int t=0; t<size; t++){
       keys[t] = randomString(KEY_LEN);
       vals[t] = randomString(VAL_LEN);
       if(t%1000 == 0)cout << (long)t*100/size << "\%\r";
    }
    cout << "Done\n" << endl;
+
    //NoVoHT map ("fbench.data", 1000000000, 10000);
    char c[40];
+   struct stat fstate;
    sprintf(c, "cat /proc/%d/status | grep VmPeak", (int)getpid());
    system(c);
    const char* fn = "";
    if(argc > 2) fn = argv[2];
-   NoVoHT map (fn, size, -1);
+   NoVoHT map (fn, size, 10000, .7);
+   stat(fn, &fstate);
+   cout << "Initial file size: " << fstate.st_size << endl << endl;
+
    //NoVoHT map ("", 10000000, -1);
    //NoVoHT map ("", 1000000, 10000, .7);
    //NoVoHT map ("", 1000000, -1);
    //NoVoHT map ("/dev/shm/fbench.data", 1000000, -1);
+
    double ins, ret, rem;
    cout << "Testing Insertion: Inserting " << size << " elements" << endl;
    ins = testInsert(map, keys,vals,size);
+   stat(fn, &fstate);
+   cout << "File size after insertion test: " << fstate.st_size << endl << endl;
+
    cout << "Testing Retrieval: Retrieving " << size << " elements" << endl;
    ret = testGet(map,keys,vals,size);
+   cout << endl;
+
    cout << "Testing Removal: Removing " << size << " elements" << endl;
    rem = testRemove(map,keys,size);
+   stat(fn, &fstate);
+   cout << "File size after removal test: " << fstate.st_size << endl << endl;
+
    cout << "\nInsertion done in " << ins << " microseconds" << endl;
    cout << "Retrieval done in " << ret << " microseconds" << endl;
    cout << "Removal done in " << rem << " microseconds" << endl;

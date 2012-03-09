@@ -152,7 +152,7 @@ int NoVoHT::remove(string k){
       ret+=mark(toRem);
       delete cur;
       nRem++;
-      if (nRem == magicNumber) ret+=writeFile(); //write and save write success
+      if (nRem == magicNumber) {ret+=writeFile(); nRem = 0;} //write and save write success
       return ret;
    }
    while(cur != NULL){
@@ -164,7 +164,7 @@ int NoVoHT::remove(string k){
          delete r;
          numEl--;
          nRem++;
-         if (nRem == magicNumber) ret+=writeFile();              //mark and sace status code
+         if (nRem == magicNumber) {ret+=writeFile(); nRem = 0;}              //mark and sace status code
          return ret;
       }
       cur = cur->next;
