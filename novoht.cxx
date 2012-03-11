@@ -185,9 +185,12 @@ int NoVoHT::remove(string k){
 int NoVoHT::writeFile(){
    while (write_lock){}
    if (!dbfile)return (filename.compare("") == 0 ? 0 : -2);
-   if (rewriting) pthread_join(writeThread, NULL);
+   if (rewriting) {
+      //pthread_join(writeThread, NULL);
+      nRem = 0;
+      return 0;
+   }
    rewriting = true;
-   printf("rewriting\n");
    swapFile = dbfile;
    dbfile = fopen(".novoht.swp", "w+");
    nRem = 0;
@@ -233,9 +236,21 @@ void NoVoHT::merge(){
          }
       }
       else{
-         readTabString(dbfile,sec);
+         while (map_lock) {}
+         map_lock = true;
          fseek(swapFile, 0, SEEK_END);
-         fprintf(swapFile, "%s\t%s\t", buf, sec);
+         string s(buf);
+         kvpair* p = kvpairs[hash(s)%size];
+         while (p != NULL){
+            if (p->key.compare(s) == 0){
+               fgetpos(swapFile, &(p->pos));
+               fprintf(swapFile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
+               break;
+            }
+            else
+               p = p->next;
+         }
+         map_lock = false;
       }
    }
    FILE *tmp = dbfile;

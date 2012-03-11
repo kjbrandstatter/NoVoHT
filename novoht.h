@@ -61,7 +61,6 @@ class NoVoHT{
         int getSize() {return numEl;}
         int getCap() {return size;}
         static void* rewriteCaller(void* map){
-           printf("thread Called\n");
            ((NoVoHT*)map)->rewriteFile(NULL);
            return NULL;}
 };
