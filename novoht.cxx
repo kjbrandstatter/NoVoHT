@@ -245,6 +245,7 @@ void NoVoHT::merge(){
             if (p->key.compare(s) == 0){
                fgetpos(swapFile, &(p->pos));
                fprintf(swapFile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
+               p->diff = false;
                break;
             }
             else
