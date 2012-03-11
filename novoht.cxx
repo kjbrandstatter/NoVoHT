@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <new>
 #include <string>
+#include <string.h>
 #include <locale>
 #include <stdio.h>
 #include <iostream>
@@ -155,7 +156,7 @@ int NoVoHT::remove(string k){
       fpos_t toRem = kvpairs[loc]->pos;
       kvpairs[loc] = cur->next;
       numEl--;
-      ret+=mark(toRem);
+      ret= rewriting ? logrm(k, toRem) +ret : ret + mark(toRem);
       delete cur;
       nRem++;
       if (nRem == magicNumber) ret+=writeFile(); //write and save write success
@@ -166,7 +167,8 @@ int NoVoHT::remove(string k){
       else if (k.compare(cur->next->key)==0){
          kvpair *r = cur->next;
          cur->next = r->next;
-         ret+=mark(r->pos);              //mark and sace status code
+         fpos_t toRem = r->pos;
+         ret= rewriting ? logrm(k, toRem) +ret : ret + mark(toRem);
          delete r;
          numEl--;
          nRem++;
@@ -183,7 +185,7 @@ int NoVoHT::remove(string k){
 int NoVoHT::writeFile(){
    while (write_lock){}
    if (!dbfile)return (filename.compare("") == 0 ? 0 : -2);
-   if (rewriting) return 0;
+   if (rewriting) pthread_join(writeThread, NULL);
    rewriting = true;
    printf("rewriting\n");
    swapFile = dbfile;
@@ -210,26 +212,37 @@ void NoVoHT::rewriteFile(void *args){
       }
    }
    merge();
-   rewriting = false;
    pthread_exit(NULL);
 }
 
 void NoVoHT::merge(){
    while(write_lock){}
    write_lock=true;
-   /*
-   printf("merging\n");
-   char c;
+   char buf[300];
+   char sec[300];
    rewind(dbfile);
-   fseek(swapFile, 0, SEEK_END);
-   while((c=fgetc(dbfile)) != EOF){
-      fputc(c, swapFile);
+   while (readTabString(dbfile,buf) != NULL){
+      if(buf[0] == '~'){
+         readTabString(dbfile, sec);
+         fseek(swapFile, (off_t) atoi(sec), SEEK_SET);
+         char test[300];
+         readTabString(swapFile,test);
+         if (strcmp(test,(buf+1)) == 0){
+                fseek(swapFile, (off_t) atoi(sec), SEEK_SET);
+                fputc('~',swapFile);
+         }
+      }
+      else{
+         readTabString(dbfile,sec);
+         fseek(swapFile, 0, SEEK_END);
+         fprintf(swapFile, "%s\t%s\t", buf, sec);
+      }
    }
-   */
    FILE *tmp = dbfile;
    dbfile = swapFile;
    fclose(tmp);
    remove(".novoht.swp");
+   rewriting = false;
    write_lock = false;
 }
 
@@ -267,6 +280,16 @@ int NoVoHT::write(kvpair * p){
    fgetpos(dbfile, &(p->pos));
    fprintf(dbfile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
    write_lock=false;
+   return 0;
+}
+
+int NoVoHT::logrm(string key, fpos_t pos){
+   while (write_lock){}
+   write_lock = true;
+   fseek(dbfile, 0, SEEK_END);
+   fputc('~', dbfile);
+   fprintf(dbfile, "%s\t%ld\t", key.c_str(), pos.__pos);
+   write_lock = false;
    return 0;
 }
 

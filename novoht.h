@@ -45,6 +45,7 @@ class NoVoHT{
    void merge();
    pthread_t writeThread;
    void rewriteFile(void*);
+   int logrm(string, fpos_t);
    public:
         NoVoHT();
         //NoVoHT(int);
