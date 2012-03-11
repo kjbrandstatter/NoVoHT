@@ -5,7 +5,7 @@ LDFLAGS=-I
 SOURCE=hashmap.cxx main.cxx
 OBJECTS=novoht.o main.o
 HEADERS=novoht.h
-BINS=kbench tonybench fbench pbench
+BINS=fbench pbench
 
 all: $(BINS)
 
@@ -13,7 +13,7 @@ pbench: novoht.o pbench.cpp
 	$(CC) novoht.o pbench.cpp -o pbench -lpthread
 
 fbench: novoht.o fbench.cxx
-	$(CC) novoht.o fbench.cxx -o fbench
+	$(CC) novoht.o fbench.cxx -o fbench -lpthread
 
 gpbbench: novoht.o gpbbench.cxx
 	$(CC) novoht.o gpbbench.cxx -o gpbbench -lz -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc meta.pb.cc

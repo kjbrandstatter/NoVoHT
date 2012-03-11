@@ -5,6 +5,7 @@
 #include <locale>
 #include <stdio.h>
 #include <iostream>
+#include <pthread.h>
 #include "novoht.h"
 
 NoVoHT::NoVoHT(){
@@ -17,6 +18,7 @@ NoVoHT::NoVoHT(){
    map_lock=false;
    write_lock=false;
    resizing = false;
+   rewriting = false;
    oldpairs = NULL;
 }
 
@@ -44,6 +46,7 @@ NoVoHT::NoVoHT(string f,int s, int m){
    resizing=false;
    map_lock=false;
    write_lock=false;
+   rewriting=false;
    magicNumber = m;
    nRem = 0;
    resizeNum = 0;
@@ -63,6 +66,7 @@ NoVoHT::NoVoHT(string f,int s, int m, float r){
    resizing=false;
    map_lock=false;
    write_lock=false;
+   rewriting=false;
    magicNumber = m;
    nRem = 0;
    resizeNum = r;
@@ -85,6 +89,7 @@ NoVoHT::NoVoHT(char * f, NoVoHT *map){
 NoVoHT::~NoVoHT(){
    if (dbfile){
       writeFile();
+      pthread_join(writeThread, NULL);
       fclose(dbfile);
    }
    for (int i = 0; i < size; i++){
@@ -110,6 +115,7 @@ int NoVoHT::put(string k, string v){
    add->key = k;
    add->val = v;
    add->next = NULL;
+   add->diff = rewriting;
    if (cur == NULL){
       kvpairs[slot] = add;
       numEl++;
@@ -152,7 +158,7 @@ int NoVoHT::remove(string k){
       ret+=mark(toRem);
       delete cur;
       nRem++;
-      if (nRem == magicNumber) {ret+=writeFile(); nRem = 0;} //write and save write success
+      if (nRem == magicNumber) ret+=writeFile(); //write and save write success
       return ret;
    }
    while(cur != NULL){
@@ -164,7 +170,7 @@ int NoVoHT::remove(string k){
          delete r;
          numEl--;
          nRem++;
-         if (nRem == magicNumber) {ret+=writeFile(); nRem = 0;}              //mark and sace status code
+         if (nRem == magicNumber) ret+=writeFile();              //mark and sace status code
          return ret;
       }
       cur = cur->next;
@@ -177,22 +183,54 @@ int NoVoHT::remove(string k){
 int NoVoHT::writeFile(){
    while (write_lock){}
    if (!dbfile)return (filename.compare("") == 0 ? 0 : -2);
-   write_lock=true;
-   int ret =0;
-   rewind(dbfile);
-   ftruncate(fileno(dbfile), 0);
+   if (rewriting) return 0;
+   rewriting = true;
+   printf("rewriting\n");
+   swapFile = dbfile;
+   dbfile = fopen(".novoht.swp", "w+");
+   nRem = 0;
+   int rc = pthread_create(&writeThread, NULL, rewriteCaller, this);
+   if (rc)
+      printf("Thread not created");
+   return rc;
+}
+
+void NoVoHT::rewriteFile(void *args){
+   //write_lock=true;
+   rewind(swapFile);
+   ftruncate(fileno(swapFile), 0);
    for (int i=0; i<size;i++){
       kvpair *cur = kvpairs[i];
       while (cur != NULL){
-         if(!cur->key.empty() && !cur->val.empty()){
-                fgetpos(dbfile, &(cur->pos));
-                fprintf(dbfile, "%s\t%s\t", cur->key.c_str(), cur->val.c_str());
+         if(!cur->key.empty() && !cur->val.empty() && !cur->diff){
+                fgetpos(swapFile, &(cur->pos));
+                fprintf(swapFile, "%s\t%s\t", cur->key.c_str(), cur->val.c_str());
          }
          cur = cur->next;
       }
    }
-   write_lock=false;
-   return ret;
+   merge();
+   rewriting = false;
+   pthread_exit(NULL);
+}
+
+void NoVoHT::merge(){
+   while(write_lock){}
+   write_lock=true;
+   /*
+   printf("merging\n");
+   char c;
+   rewind(dbfile);
+   fseek(swapFile, 0, SEEK_END);
+   while((c=fgetc(dbfile)) != EOF){
+      fputc(c, swapFile);
+   }
+   */
+   FILE *tmp = dbfile;
+   dbfile = swapFile;
+   fclose(tmp);
+   remove(".novoht.swp");
+   write_lock = false;
 }
 
 //success 0 fail -2

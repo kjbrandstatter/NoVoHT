@@ -11,6 +11,13 @@ struct kvpair{
    string val;
    //int val;
    fpos_t pos;
+   bool diff;
+};
+
+struct writeJob{
+   pthread_t wjob;
+   char * fname;
+   writeJob *next;
 };
 
 class NoVoHT{
@@ -20,8 +27,11 @@ class NoVoHT{
    bool resizing;
    bool map_lock;
    bool write_lock;
+   bool rewriting;
    int numEl;
    FILE * dbfile;
+   FILE * swapFile;
+   int swapNo;
    string filename;
    int nRem;
    void resize(int ns);
@@ -31,6 +41,10 @@ class NoVoHT{
    int mark(fpos_t);
    int magicNumber;
    float resizeNum;
+   //writeJob* rewriteQueue;
+   void merge();
+   pthread_t writeThread;
+   void rewriteFile(void*);
    public:
         NoVoHT();
         //NoVoHT(int);
@@ -45,6 +59,10 @@ class NoVoHT{
         int remove(string);
         int getSize() {return numEl;}
         int getCap() {return size;}
+        static void* rewriteCaller(void* map){
+           printf("thread Called\n");
+           ((NoVoHT*)map)->rewriteFile(NULL);
+           return NULL;}
 };
 
 unsigned long long hash (string k);
