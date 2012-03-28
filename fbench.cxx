@@ -7,8 +7,8 @@
 #include <cstddef>
 #include <sys/time.h>//
 #include <sys/stat.h>
-#define KEY_LEN 32
-#define VAL_LEN 128
+#define KEY_LEN 48
+#define VAL_LEN 24
 using namespace std;
 struct timeval tp;
 double diffclock(clock_t clock1, clock_t clock2){
