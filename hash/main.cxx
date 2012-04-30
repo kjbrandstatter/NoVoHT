@@ -4,7 +4,7 @@
 #include <string.h>
 #include <string>
 #include <stdlib.h>
-//#include "time.h"
+#include "time.h"
 #include <sys/time.h>
 #include <math.h>
 
@@ -50,36 +50,35 @@ double diffclock(clock_t clock1, clock_t clock2){
 void testsfh(string * testvals, int * buckets, int nv, int nb){
    printf("Testing SuperFastHash\n");
    struct SuperFastHash hash;
-   int collisions = 0;
-   double beg=getTime_usec();
+   //int collisions = 0;
+   clock_t beg=clock();
    for (int y = 0; y < nv; y++){
       int x = hash(testvals[y].c_str());
-      if(buckets[x%nb] > 0)
-         collisions++;
+      //if(buckets[x%nb] > 0)
+         //collisions++;
       buckets[x%nb]++;
    }
-   double end=getTime_usec();
-   if (end < 0 || beg < 0) return;
-   printf("Time to hash: %lfms\n", end-beg);
+   clock_t end=clock();
    int max =buckets[0], min = buckets[0];
-   double variance = 0, avgload = nv*1.0/nb;
+   //double variance = 0, avgload = nv*1.0/nb;
    buckets[0] = 0;
    for (int i = 1; i < nb; i++){
       if (buckets[i] > max) max = buckets[i];
       if (buckets[i] < min) min = buckets[i];
-      if (buckets[i] > avgload)
-         variance += pow(buckets[i]-avgload, 2.0);
-      else
-         variance += pow(avgload-buckets[i], 2.0);
-      buckets[i]= 0;
+      //if (buckets[i] > avgload)
+         //variance += pow(buckets[i]-avgload, 2.0);
+      //else
+         //variance += pow(avgload-buckets[i], 2.0);
+      //buckets[i]= 0;
    }
-   printf("collisions = %d\n", collisions);
+   printf("Time to hash: %lfms\n", diffclock(end,beg));
+   //printf("collisions = %d\n", collisions);
    printf("Bucket max: %d\n", max);
-   variance /= nb;
-   printf("Bucket min: %d\n", min);
-   printf("variance = %f\n", variance);
-   double stdev = sqrt(variance);
-   printf("stnd dev: %lf\n\n", stdev);
+   //variance /= nb;
+   printf("Bucket min: %d\n\n", min);
+   //printf("variance = %f\n", variance);
+   //double stdev = sqrt(variance);
+   //printf("stnd dev: %lf\n\n", stdev);
 }
 void testfnv(string * testvals, int * buckets, int nv, int nb){
    printf("Testing FNVHash\n");
@@ -221,7 +220,7 @@ int main(int argc, char** argv){
    testbjh(testvals, buckets, numvals, numslots);
    testoat(testvals, buckets, numvals, numslots);
    testsdbm(testvals, buckets, numvals, numslots);
-   delete buckets;
-   delete testvals;
+   //delete buckets;
+   //delete testvals;
    return 0;
 }
