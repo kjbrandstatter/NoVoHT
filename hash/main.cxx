@@ -212,9 +212,9 @@ int main(int argc, char** argv){
    }
    string * testvals = new string[numvals];
    for (int y = 0; y < numvals; y++){
-      testvals[y] = randomString(96);
+      testvals[y] = randomString(48);
    }
-   testsfh(testvals, buckets, numvals, numslots);
+   //testsfh(testvals, buckets, numvals, numslots);
    testfnv(testvals, buckets, numvals, numslots);
    testcrc(testvals, buckets, numvals, numslots);
    testbjh(testvals, buckets, numvals, numslots);
