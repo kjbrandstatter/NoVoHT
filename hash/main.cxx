@@ -1,4 +1,5 @@
-#include <cmath>
+//#include <cmath>
+#include <math.h>
 #include <stdio.h>
 #include "hash-functions.h"
 #include <unistd.h>
@@ -220,7 +221,7 @@ int main(int argc, char** argv){
    testbjh(testvals, buckets, numvals, numslots);
    testoat(testvals, buckets, numvals, numslots);
    testsdbm(testvals, buckets, numvals, numslots);
-   //delete buckets;
-   //delete testvals;
+   delete [] buckets;
+   delete [] testvals;
    return 0;
 }
