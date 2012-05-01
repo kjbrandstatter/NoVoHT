@@ -1,3 +1,4 @@
+#include <cmath>
 #include <stdio.h>
 #include "hash-functions.h"
 #include <unistd.h>
@@ -6,7 +7,6 @@
 #include <stdlib.h>
 #include "time.h"
 #include <sys/time.h>
-#include <math.h>
 
 using namespace std;
 
@@ -50,35 +50,35 @@ double diffclock(clock_t clock1, clock_t clock2){
 void testsfh(string * testvals, int * buckets, int nv, int nb){
    printf("Testing SuperFastHash\n");
    struct SuperFastHash hash;
-   //int collisions = 0;
+   int collisions = 0;
    clock_t beg=clock();
    for (int y = 0; y < nv; y++){
       int x = hash(testvals[y].c_str());
-      //if(buckets[x%nb] > 0)
-         //collisions++;
+      if(buckets[x%nb] > 0)
+         collisions++;
       buckets[x%nb]++;
    }
    clock_t end=clock();
    int max =buckets[0], min = buckets[0];
-   //double variance = 0, avgload = nv*1.0/nb;
+   double variance = 0, avgload = double(nb)/double(nb);
    buckets[0] = 0;
    for (int i = 1; i < nb; i++){
       if (buckets[i] > max) max = buckets[i];
       if (buckets[i] < min) min = buckets[i];
-      //if (buckets[i] > avgload)
-         //variance += pow(buckets[i]-avgload, 2.0);
-      //else
-         //variance += pow(avgload-buckets[i], 2.0);
-      //buckets[i]= 0;
+      //variance += pow(double(buckets[i])-avgload, 2);
+      double tmp = double(buckets[i])-avgload;
+      double t2 = tmp*tmp;
+      variance += t2;
+      buckets[i]= 0;
    }
    printf("Time to hash: %lfms\n", diffclock(end,beg));
-   //printf("collisions = %d\n", collisions);
+   printf("collisions = %d\n", collisions);
    printf("Bucket max: %d\n", max);
-   //variance /= nb;
+   variance /= double(nb);
    printf("Bucket min: %d\n\n", min);
-   //printf("variance = %f\n", variance);
-   //double stdev = sqrt(variance);
-   //printf("stnd dev: %lf\n\n", stdev);
+   printf("variance = %f\n", variance);
+   double stdev = sqrt(variance);
+   printf("stnd dev: %lf\n\n", stdev);
 }
 void testfnv(string * testvals, int * buckets, int nv, int nb){
    printf("Testing FNVHash\n");
