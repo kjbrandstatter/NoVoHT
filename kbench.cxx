@@ -16,7 +16,12 @@ int main(int argc, char *argv[]){
    if (argc > 1)
       size = atoi(argv[1]);
    else size = SIZE;
-   testInsert();
+   NoVoHT *map = new NoVoHT("hash.table", size, -1);
+   map->put("kevin","hello");
+   map->put("kevin","overwrite");
+   printf("The value is %s", (map->get("kevin"))->c_str());
+   //testInsert();
+   delete map;
    return 0;
 }
 

@@ -117,10 +117,22 @@ int NoVoHT::put(string k, string v){
       return write(add);
    }
    while (cur->next != NULL){
-      if (k.compare(cur->key) == 0) {delete add; map_lock=false; return -1;}
+      if (k.compare(cur->key) == 0) {
+         cur->val = v;
+         mark(cur->pos);
+         delete add;
+         map_lock=false;
+         return write(cur);
+      }
       cur = cur->next;
    }
-   if (k.compare(cur->key) == 0) {delete add; map_lock=false; return -1;}
+   if (k.compare(cur->key) == 0) {
+      cur->val=v;
+      mark(cur->pos);
+      delete add;
+      map_lock=false;
+      return write(cur);
+   }
    cur->next = add;
    numEl++;
    map_lock=false;
