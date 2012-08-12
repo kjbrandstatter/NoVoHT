@@ -13,6 +13,57 @@ struct kvpair{
    fpos_t pos;
 };
 
+template <class type>
+class novoht_iterator{
+   protected:
+      kvpair ** list;
+      kvpair * current;
+      int index;
+      int length;
+   public:
+      novoht_iterator(kvpair**, int);
+      void next();
+};
+
+template <class type>
+novoht_iterator<type>::novoht_iterator(kvpair** l, int size){
+   list = l;
+   index = 0;
+   length = size;
+   while ((current = list[index]) == NULL){
+      index++;
+      if (index >= length)
+         break;
+   }
+}
+
+template <class type>
+void novoht_iterator<type>::next(){
+   if (current->next != NULL)
+      current = current->next;
+   else {
+      while ((current = list[++index]) == NULL) {}
+   }
+}
+
+class key_iterator: public novoht_iterator<string>{
+   public:
+      string value(void){ return current->key; }
+      key_iterator(kvpair** l,int s) : novoht_iterator<string>(l,s) { }
+};
+
+class val_iterator: public novoht_iterator<string>{
+   public:
+      string value(void){ return current->val; }
+      val_iterator(kvpair** l,int s) : novoht_iterator<string>(l,s) { }
+};
+
+class pair_iterator: public novoht_iterator<kvpair>{
+   public:
+      kvpair value(void) { return *current; }
+      pair_iterator(kvpair** l,int s) : novoht_iterator<kvpair>(l,s) { }
+};
+
 class NoVoHT{
    int size;
    kvpair** kvpairs;
@@ -45,6 +96,9 @@ class NoVoHT{
         int remove(string);
         int getSize() {return numEl;}
         int getCap() {return size;}
+        key_iterator keyIterator();
+        val_iterator valIterator();
+        pair_iterator pairIterator();
 };
 
 unsigned long long hash (string k);
@@ -52,4 +106,5 @@ unsigned long long hash (string k);
 void fsu(kvpair *);
 
 char *readTabString(FILE*, char*);
+
 #endif

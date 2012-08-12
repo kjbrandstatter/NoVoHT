@@ -307,3 +307,13 @@ void fsu(kvpair* p){
       delete p;
    }
 }
+
+key_iterator NoVoHT::keyIterator(){
+   return key_iterator(kvpairs, size);
+}
+val_iterator NoVoHT::valIterator(){
+   return val_iterator(kvpairs, size);
+}
+pair_iterator NoVoHT::pairIterator(){
+   return pair_iterator(kvpairs, size);
+}
