@@ -5,106 +5,201 @@
 #include <stdio.h>
 using namespace std;
 
-struct kvpair{
-   struct kvpair * next;
-   string key;
-   string val;
-   //int val;
-   fpos_t pos;
+struct kvpair {
+	struct kvpair * next;
+	string key;
+	string val;
+	//int val;
+	fpos_t pos;
 };
 
-template <class type>
-class novoht_iterator{
-   protected:
-      kvpair ** list;
-      kvpair * current;
-      int index;
-      int length;
-   public:
-      novoht_iterator(kvpair**, int);
-      void next();
+class NoVoHT;
+
+template<class type>
+class novoht_iterator {
+
+protected:
+	kvpair ** list;
+	kvpair * previous;
+	kvpair * current;
+	int index;
+	int idxplus;
+	int length;
+	NoVoHT *_NoVoHT;
+
+protected:
+	void nextInternal();
+
+public:
+	novoht_iterator(kvpair**, int, NoVoHT*);
+	virtual ~novoht_iterator();
+
+	bool hasNext();
+	virtual type next() = 0;
+	void remove();
+
 };
 
-template <class type>
-novoht_iterator<type>::novoht_iterator(kvpair** l, int size){
-   list = l;
-   index = 0;
-   length = size;
-   while ((current = list[index]) == NULL){
-      index++;
-      if (index >= length)
-         break;
-   }
+template<class type>
+novoht_iterator<type>::novoht_iterator(kvpair** l, int size,
+		NoVoHT *container) {
+
+	_NoVoHT = container;
+	list = l;
+	index = 0;
+	idxplus = 0;
+	length = size;
+	while (index < length && (current = list[index]) == NULL) {
+		index++;
+		if (index >= length)
+			break;
+	}
 }
 
-template <class type>
-void novoht_iterator<type>::next(){
-   if (current->next != NULL)
-      current = current->next;
-   else {
-      while ((current = list[++index]) == NULL) {}
-   }
+template<class type>
+novoht_iterator<type>::~novoht_iterator() {
 }
 
-class key_iterator: public novoht_iterator<string>{
-   public:
-      string value(void){ return current->key; }
-      key_iterator(kvpair** l,int s) : novoht_iterator<string>(l,s) { }
+template<class type>
+bool novoht_iterator<type>::hasNext() {
+
+	bool result = false;
+
+	if (current != NULL && current->next != NULL)
+		result = true;
+	else {
+		int i = index;
+		kvpair *cursor;
+
+		while (i + 1 < length && (cursor = list[++i]) == NULL) {
+		}
+
+		if (index + 1 >= length)
+			result = false;
+		else
+			result = true;
+	}
+
+	return result;
+}
+
+template<class type>
+void novoht_iterator<type>::nextInternal() {
+
+	previous = current;
+
+	if (current != NULL && current->next != NULL)
+		current = current->next;
+	else {
+		while (index + 1 < length && (current = list[++index]) == NULL) {
+		}
+	}
+}
+
+class key_iterator: public novoht_iterator<string> {
+public:
+	key_iterator(kvpair** l, int s, NoVoHT *container) :
+			novoht_iterator<string>(l, s, container) {
+	}
+
+	virtual ~key_iterator() {
+	}
+
+	string next(void) {
+		string key = current->key;
+		nextInternal();
+
+		return key;
+	}
 };
 
-class val_iterator: public novoht_iterator<string>{
-   public:
-      string value(void){ return current->val; }
-      val_iterator(kvpair** l,int s) : novoht_iterator<string>(l,s) { }
+class val_iterator: public novoht_iterator<string> {
+public:
+	val_iterator(kvpair** l, int s, NoVoHT *container) :
+			novoht_iterator<string>(l, s, container) {
+	}
+
+	virtual ~val_iterator() {
+	}
+
+	string next(void) {
+		string value = current->val;
+		nextInternal();
+
+		return value;
+	}
+
 };
 
-class pair_iterator: public novoht_iterator<kvpair>{
-   public:
-      kvpair value(void) { return *current; }
-      pair_iterator(kvpair** l,int s) : novoht_iterator<kvpair>(l,s) { }
+class pair_iterator: public novoht_iterator<kvpair> {
+public:
+	pair_iterator(kvpair** l, int s, NoVoHT *container) :
+			novoht_iterator<kvpair>(l, s, container) {
+	}
+
+	virtual ~pair_iterator() {
+	}
+
+	kvpair next(void) {
+		kvpair kv = *current;
+		nextInternal();
+
+		return kv;
+	}
 };
 
-class NoVoHT{
-   int size;
-   kvpair** kvpairs;
-   kvpair** oldpairs;
-   bool resizing;
-   bool map_lock;
-   bool write_lock;
-   int numEl;
-   FILE * dbfile;
-   string filename;
-   int nRem;
-   void resize(int ns);
-   int write(kvpair *);
-   //void writeFile();
-   void readFile();
-   int mark(fpos_t);
-   int magicNumber;
-   float resizeNum;
-   public:
-        NoVoHT();
-        //NoVoHT(int);
-        //NoVoHT(char *);
-        NoVoHT(string, int, int);
-        NoVoHT(string, int, int, float);
-        //NoVoHT(char *, NoVoHT*);
-        ~NoVoHT();
-        int writeFile();
-        int put(string,  string);
-        string* get(string);
-        int remove(string);
-        int getSize() {return numEl;}
-        int getCap() {return size;}
-        key_iterator keyIterator();
-        val_iterator valIterator();
-        pair_iterator pairIterator();
+class NoVoHT {
+	int size;
+	kvpair** kvpairs;
+	kvpair** oldpairs;
+	bool resizing;
+	bool map_lock;
+	bool write_lock;
+	int numEl;
+	FILE * dbfile;
+	string filename;
+	int nRem;
+	void resize(int ns);
+	int write(kvpair *);
+	//void writeFile();
+	void readFile();
+	int mark(fpos_t);
+	int magicNumber;
+	float resizeNum;
+public:
+	NoVoHT();
+	//NoVoHT(int);
+	//NoVoHT(char *);
+	NoVoHT(string, int, int);
+	NoVoHT(string, int, int, float);
+	//NoVoHT(char *, NoVoHT*);
+	~NoVoHT();
+	int writeFile();
+	int put(string, string);
+	string* get(string);
+	int remove(string);
+	int getSize() {
+		return numEl;
+	}
+	int getCap() {
+		return size;
+	}
+	key_iterator keyIterator();
+	val_iterator valIterator();
+	pair_iterator pairIterator();
 };
 
-unsigned long long hash (string k);
+unsigned long long hash(string k);
 
 void fsu(kvpair *);
 
 char *readTabString(FILE*, char*);
+
+template<class type>
+void novoht_iterator<type>::remove() {
+
+	if (previous != NULL)
+		_NoVoHT->remove(previous->key);
+}
 
 #endif
