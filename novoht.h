@@ -44,6 +44,7 @@ template<class type>
 novoht_iterator<type>::novoht_iterator(kvpair** l, int size,
 		NoVoHT *container) {
 
+	previous = NULL;
 	_NoVoHT = container;
 	list = l;
 	index = 0;
@@ -141,7 +142,11 @@ public:
 	}
 
 	kvpair next(void) {
-		kvpair kv = *current;
+//		kvpair kv = *current; //lead to bug
+		kvpair kv;
+		kv.key = string(current->key.c_str());
+		kv.val = string(current->val.c_str());
+
 		nextInternal();
 
 		return kv;
@@ -170,18 +175,18 @@ public:
 	NoVoHT();
 	//NoVoHT(int);
 	//NoVoHT(char *);
-	NoVoHT(string, int, int);
-	NoVoHT(string, int, int, float);
+	NoVoHT(const string&, const int&, const int&);
+	NoVoHT(const string&, const int&, const int&, const float&);
 	//NoVoHT(char *, NoVoHT*);
 	~NoVoHT();
 	int writeFile();
 	int put(string, string);
-	string* get(string);
+	string* get(string) ;
 	int remove(string);
-	int getSize() {
+	int getSize() const {
 		return numEl;
 	}
-	int getCap() {
+	int getCap() const {
 		return size;
 	}
 	key_iterator keyIterator();

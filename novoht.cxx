@@ -36,7 +36,7 @@ NoVoHT::NoVoHT() {
  readFile();
  }
  */
-NoVoHT::NoVoHT(string f, int s, int m) {
+NoVoHT::NoVoHT(const string& f, const int& s, const int& m) {
 	kvpairs = new kvpair*[s];
 	for (int x = 0; x < s; x++) {
 		kvpairs[x] = NULL;
@@ -56,7 +56,8 @@ NoVoHT::NoVoHT(string f, int s, int m) {
 	readFile();
 	oldpairs = NULL;
 }
-NoVoHT::NoVoHT(string f, int s, int m, float r) {
+
+NoVoHT::NoVoHT(const string& f, const int& s, const int& m, const float& r) {
 	kvpairs = new kvpair*[s];
 	for (int x = 0; x < s; x++) {
 		kvpairs[x] = NULL;
