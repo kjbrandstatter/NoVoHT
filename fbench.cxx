@@ -7,8 +7,8 @@
 #include <cstddef>
 #include <sys/time.h>//
 #include <sys/stat.h>
-#define KEY_LEN 32
-#define VAL_LEN 128
+#define KEY_LEN 48
+#define VAL_LEN 24
 using namespace std;
 struct timeval tp;
 double diffclock(clock_t clock1, clock_t clock2){
@@ -100,7 +100,10 @@ int main(int argc, char *argv[]){
    const char* fn = "";
    if(argc > 2) fn = argv[2];
    //NoVoHT map (fn, size, 10000, .7);
-   NoVoHT map (fn, size, -1);
+   NoVoHT map (fn, size, 10000);
+   //NoVoHT map (fn, size, 100, .7);
+   stat(fn, &fstate);
+   cout << "Initial file size: " << fstate.st_size << endl << endl;
 
    //NoVoHT map ("", 10000000, -1);
    //NoVoHT map ("", 1000000, 10000, .7);

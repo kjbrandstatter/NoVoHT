@@ -5,12 +5,19 @@
 #include <stdio.h>
 using namespace std;
 
-struct kvpair {
-	struct kvpair * next;
-	string key;
-	string val;
-	//int val;
-	fpos_t pos;
+struct kvpair{
+   struct kvpair * next;
+   string key;
+   string val;
+   //int val;
+   fpos_t pos;
+   bool diff;
+};
+
+struct writeJob{
+   pthread_t wjob;
+   char * fname;
+   writeJob *next;
 };
 
 class NoVoHT;
@@ -153,24 +160,32 @@ public:
 	}
 };
 
-class NoVoHT {
-	int size;
-	kvpair** kvpairs;
-	kvpair** oldpairs;
-	bool resizing;
-	bool map_lock;
-	bool write_lock;
-	int numEl;
-	FILE * dbfile;
-	string filename;
-	int nRem;
-	void resize(int ns);
-	int write(kvpair *);
-	//void writeFile();
-	void readFile();
-	int mark(fpos_t);
-	int magicNumber;
-	float resizeNum;
+class NoVoHT{
+   int size;
+   kvpair** kvpairs;
+   kvpair** oldpairs;
+   bool resizing;
+   bool map_lock;
+   bool write_lock;
+   bool rewriting;
+   int numEl;
+   FILE * dbfile;
+   FILE * swapFile;
+   int swapNo;
+   string filename;
+   int nRem;
+   void resize(int ns);
+   int write(kvpair *);
+   //void writeFile();
+   void readFile();
+   int mark(fpos_t);
+   int magicNumber;
+   float resizeNum;
+   //writeJob* rewriteQueue;
+   void merge();
+   pthread_t writeThread;
+   void rewriteFile(void*);
+   int logrm(string, fpos_t);
 public:
 	NoVoHT();
 	//NoVoHT(int);
@@ -192,6 +207,9 @@ public:
 	key_iterator keyIterator();
 	val_iterator valIterator();
 	pair_iterator pairIterator();
+        static void* rewriteCaller(void* map){
+           ((NoVoHT*)map)->rewriteFile(NULL);
+           return NULL;}
 };
 
 unsigned long long hash(string k);

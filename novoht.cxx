@@ -2,22 +2,25 @@
 #include <stdlib.h>
 #include <new>
 #include <string>
+#include <string.h>
 #include <locale>
 #include <stdio.h>
 #include <iostream>
+#include <pthread.h>
 #include "novoht.h"
 
-NoVoHT::NoVoHT() {
-	kvpairs = new kvpair*[1000];
-	size = 1000;
-	numEl = 0;
-	magicNumber = 1000;
-	resizeNum = -1;
-	resizing = false;
-	map_lock = false;
-	write_lock = false;
-	resizing = false;
-	oldpairs = NULL;
+NoVoHT::NoVoHT(){
+   kvpairs = new kvpair*[1000];
+   size = 1000;
+   numEl = 0;
+   magicNumber = 1000;
+   resizeNum = -1;
+   resizing=false;
+   map_lock=false;
+   write_lock=false;
+   resizing = false;
+   rewriting = false;
+   oldpairs = NULL;
 }
 
 /*
@@ -28,6 +31,7 @@ NoVoHT::NoVoHT() {
  file = NULL;
  }
 
+<<<<<<< HEAD
  NoVoHT::NoVoHT(char * f){
  kvpairs = new kvpair*[1000];
  size = 1000;
@@ -44,6 +48,7 @@ NoVoHT::NoVoHT(const string& f, const int& s, const int& m) {
 	resizing = false;
 	map_lock = false;
 	write_lock = false;
+        rewriting = false;
 	magicNumber = m;
 	nRem = 0;
 	resizeNum = 0;
@@ -65,6 +70,7 @@ NoVoHT::NoVoHT(const string& f, const int& s, const int& m, const float& r) {
 	resizing = false;
 	map_lock = false;
 	write_lock = false;
+        rewriting = false;
 	magicNumber = m;
 	nRem = 0;
 	resizeNum = r;
@@ -85,16 +91,6 @@ NoVoHT::NoVoHT(const string& f, const int& s, const int& m, const float& r) {
  file = f;
  readFile();
  }*/
-NoVoHT::~NoVoHT() {
-	if (dbfile) {
-		writeFile();
-		fclose(dbfile);
-	}
-	for (int i = 0; i < size; i++) {
-		fsu(kvpairs[i]);
-	}
-	delete[] kvpairs;
-}
 
 //0 success, -1 no insert, -2 no write
 int NoVoHT::put(string k, string v) {
@@ -143,6 +139,18 @@ int NoVoHT::put(string k, string v) {
 	return write(add);
 }
 
+NoVoHT::~NoVoHT(){
+   if (dbfile){
+      writeFile();
+      pthread_join(writeThread, NULL);
+      fclose(dbfile);
+   }
+   for (int i = 0; i < size; i++){
+      fsu(kvpairs[i]);
+   }
+   delete [] kvpairs;
+}
+
 string* NoVoHT::get(string k) {
 	while (map_lock) { /* Wait till done */
 	}
@@ -157,71 +165,120 @@ string* NoVoHT::get(string k) {
 }
 
 //return 0 for success, -1 fail to remove, -2+ write failure
-int NoVoHT::remove(string k) {
-	while (map_lock) { /* Wait till done */
-	}
-	int ret = 0;
-	int loc = hash(k) % size;
-	kvpair *cur = kvpairs[loc];
-	if (cur == NULL)
-		return ret - 1; //not found
-	if (k.compare(cur->key) == 0) {
-		fpos_t toRem = kvpairs[loc]->pos;
-		kvpairs[loc] = cur->next;
-		numEl--;
-		ret += mark(toRem);
-		delete cur;
-		nRem++;
-		if (nRem == magicNumber) {
-			ret += writeFile();
-			nRem = 0;
-		} //write and save write success
-		return ret;
-	}
-	while (cur != NULL) {
-		if (cur->next == NULL)
-			return ret - 1;
-		else if (k.compare(cur->next->key) == 0) {
-			kvpair *r = cur->next;
-			cur->next = r->next;
-			ret += mark(r->pos); //mark and sace status code
-			delete r;
-			numEl--;
-			nRem++;
-			if (nRem == magicNumber) {
-				ret += writeFile();
-				nRem = 0;
-			} //mark and sace status code
-			return ret;
-		}
-		cur = cur->next;
-	}
-	return ret - 1; //not found
+int NoVoHT::remove(string k){
+   while(map_lock){ /* Wait till done */}
+   int ret =0;
+   int loc = hash(k)%size;
+   kvpair *cur = kvpairs[loc];
+   if (cur == NULL) return ret-1;       //not found
+   if (k.compare(cur->key) ==0) {
+      fpos_t toRem = kvpairs[loc]->pos;
+      kvpairs[loc] = cur->next;
+      numEl--;
+      ret= rewriting ? logrm(k, toRem) +ret : ret + mark(toRem);
+      delete cur;
+      nRem++;
+      if (nRem == magicNumber) ret+=writeFile(); //write and save write success
+      return ret;
+   }
+   while(cur != NULL){
+      if (cur->next == NULL) return ret-1;
+      else if (k.compare(cur->next->key)==0){
+         kvpair *r = cur->next;
+         cur->next = r->next;
+         fpos_t toRem = r->pos;
+         ret= rewriting ? logrm(k, toRem) +ret : ret + mark(toRem);
+         delete r;
+         numEl--;
+         nRem++;
+         if (nRem == magicNumber) ret+=writeFile();              //mark and sace status code
+         return ret;
+      }
+      cur = cur->next;
+   }
+   return ret-1;        //not found
 }
 
 //return 0 if success -2 if failed
 //write hashmap to file
-int NoVoHT::writeFile() {
-	while (write_lock) {
-	}
-	if (!dbfile)
-		return (filename.compare("") == 0 ? 0 : -2);
-	write_lock = true;
-	int ret = 0;
-	rewind(dbfile);
-	ftruncate(fileno(dbfile), 0);
-	for (int i = 0; i < size; i++) {
-		kvpair *cur = kvpairs[i];
-		while (cur != NULL) {
-			if (!cur->key.empty() && !cur->val.empty()) {
-				fgetpos(dbfile, &(cur->pos));
-				fprintf(dbfile, "%s\t%s\t", cur->key.c_str(), cur->val.c_str());
-			}
-			cur = cur->next;
-		}
-	}
-	write_lock = false;
-	return ret;
+int NoVoHT::writeFile(){
+   while (write_lock){}
+   if (!dbfile)return (filename.compare("") == 0 ? 0 : -2);
+   if (rewriting) {
+      //pthread_join(writeThread, NULL);
+      nRem = 0;
+      return 0;
+   }
+   rewriting = true;
+   swapFile = dbfile;
+   dbfile = fopen(".novoht.swp", "w+");
+   nRem = 0;
+   int rc = pthread_create(&writeThread, NULL, rewriteCaller, this);
+   if (rc)
+      printf("Thread not created");
+   return rc;
+}
+
+void NoVoHT::rewriteFile(void *args){
+   //write_lock=true;
+   rewind(swapFile);
+   ftruncate(fileno(swapFile), 0);
+   for (int i=0; i<size;i++){
+      kvpair *cur = kvpairs[i];
+      while (cur != NULL){
+         if(!cur->key.empty() && !cur->val.empty() && !cur->diff){
+                fgetpos(swapFile, &(cur->pos));
+                fprintf(swapFile, "%s\t%s\t", cur->key.c_str(), cur->val.c_str());
+         }
+         cur = cur->next;
+      }
+   }
+   merge();
+   pthread_exit(NULL);
+}
+
+void NoVoHT::merge(){
+   while(write_lock){}
+   write_lock=true;
+   char buf[300];
+   char sec[300];
+   rewind(dbfile);
+   while (readTabString(dbfile,buf) != NULL){
+      if(buf[0] == '~'){
+         readTabString(dbfile, sec);
+         fseek(swapFile, (off_t) atoi(sec), SEEK_SET);
+         char test[300];
+         readTabString(swapFile,test);
+         if (strcmp(test,(buf+1)) == 0){
+                fseek(swapFile, (off_t) atoi(sec), SEEK_SET);
+                fputc('~',swapFile);
+         }
+      }
+      else{
+         while (map_lock) {}
+         map_lock = true;
+         fseek(swapFile, 0, SEEK_END);
+         string s(buf);
+         kvpair* p = kvpairs[hash(s)%size];
+         while (p != NULL){
+            if (p->key.compare(s) == 0){
+               fgetpos(swapFile, &(p->pos));
+               fprintf(swapFile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
+               p->diff = false;
+               break;
+            }
+            else
+               p = p->next;
+         }
+         map_lock = false;
+      }
+   }
+   FILE *tmp = dbfile;
+   dbfile = swapFile;
+   fclose(tmp);
+   remove(".novoht.swp");
+   rewriting = false;
+   write_lock = false;
 }
 
 //success 0 fail -2
@@ -263,6 +320,16 @@ int NoVoHT::write(kvpair * p) {
 	fprintf(dbfile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
 	write_lock = false;
 	return 0;
+}
+
+int NoVoHT::logrm(string key, fpos_t pos){
+   while (write_lock){}
+   write_lock = true;
+   fseek(dbfile, 0, SEEK_END);
+   fputc('~', dbfile);
+   fprintf(dbfile, "%s\t%ld\t", key.c_str(), pos.__pos);
+   write_lock = false;
+   return 0;
 }
 
 //success 0 fail -2
