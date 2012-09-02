@@ -31,7 +31,6 @@ NoVoHT::NoVoHT(){
  file = NULL;
  }
 
-<<<<<<< HEAD
  NoVoHT::NoVoHT(char * f){
  kvpairs = new kvpair*[1000];
  size = 1000;
