@@ -198,6 +198,36 @@ int NoVoHT::remove(string k){
    return ret-1;        //not found
 }
 
+int NoVoHT::append(string k, string aval){
+   while(map_lock) { /* Wait for it... */ }
+   int ret = 0;
+   int loc = hash(k)%size;
+   kvpair *cur = kvpairs[loc];
+   if (cur == NULL) return ret-1; //Not Found
+   if (k.compare(cur->key) == 0){
+      fpos_t toRem = cur->pos;
+      ret = rewriting ? logrm(k, toRem) + ret : mark(toRem);
+      cur->val += aval;
+      if (((unsigned int)SEEK_END - cur->val.size() - cur->key.size())
+            == (unsigned int) (cur->pos.__pos)){
+         fseek(dbfile, -1, SEEK_END);
+         return fprintf(dbfile, ":%s\t", aval.c_str());
+      }
+      return write(cur);
+   }
+   while (cur != NULL){
+      if (cur->next == NULL) return ret-1;
+      else if (k.compare(cur->next->key) == 0){
+            fpos_t toRem = cur->next->pos;
+            ret = rewriting ? logrm(k, toRem) +ret : mark(toRem);
+            cur->next->val += aval;
+            return write(cur->next);
+      }
+      cur = cur->next;
+   }
+   return -1; // Not found = append failed
+}
+
 //return 0 if success -2 if failed
 //write hashmap to file
 int NoVoHT::writeFile(){

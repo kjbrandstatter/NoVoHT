@@ -196,6 +196,7 @@ public:
 	~NoVoHT();
 	int writeFile();
 	int put(string, string);
+        int append(string,string);
 	string* get(string) ;
 	int remove(string);
 	int getSize() const {
