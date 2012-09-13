@@ -1,7 +1,7 @@
 PROJECT=HashTable
 CC=g++
 CFLAGS=-c -Wall
-LDFLAGS=-I
+LDFLAGS=-I -lpthread
 SOURCE=hashmap.cxx main.cxx
 OBJECTS=novoht.o main.o
 HEADERS=novoht.h
@@ -23,6 +23,9 @@ kbench: novoht.o kbench.cxx
 
 tonybench: novoht.o test_hash.cpp
 	$(CC) novoht.o test_hash.cpp -o tonybench
+
+appendtest: novoht.o appendtest.cpp
+	$(CC) novoht.o appendtest.cpp -o appendtest -lpthread
 
 libnovoht: novoht.o
 	g++ $(CFLAGS) -fPIC -o novoht.obj novoht.cxx

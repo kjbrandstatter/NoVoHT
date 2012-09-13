@@ -206,22 +206,28 @@ int NoVoHT::append(string k, string aval){
    if (cur == NULL) return ret-1; //Not Found
    if (k.compare(cur->key) == 0){
       fpos_t toRem = cur->pos;
-      ret = rewriting ? logrm(k, toRem) + ret : mark(toRem);
-      cur->val += aval;
-      if (((unsigned int)SEEK_END - cur->val.size() - cur->key.size())
+      cur->val += ":" + aval;
+      fseek(dbfile, -1, SEEK_END);
+      if (((unsigned int)ftell(dbfile) - cur->val.size() - cur->key.size() + aval.size())
             == (unsigned int) (cur->pos.__pos)){
-         fseek(dbfile, -1, SEEK_END);
-         return fprintf(dbfile, ":%s\t", aval.c_str());
+         fprintf(dbfile, ":%s\t", aval.c_str());
+         return 0;
       }
-      return write(cur);
+      ret = rewriting ? logrm(k, toRem) + ret : mark(toRem);
+      return write(cur) + ret;
    }
    while (cur != NULL){
       if (cur->next == NULL) return ret-1;
       else if (k.compare(cur->next->key) == 0){
             fpos_t toRem = cur->next->pos;
+            cur->next->val += ":" + aval;
+            fseek(dbfile, -1, SEEK_END);
+            if (((unsigned int)ftell(dbfile) - cur->val.size() - cur->key.size() + aval.size())
+                  == (unsigned int) (cur->pos.__pos)){
+               return fprintf(dbfile, ":%s\t", aval.c_str());
+            }
             ret = rewriting ? logrm(k, toRem) +ret : mark(toRem);
-            cur->next->val += aval;
-            return write(cur->next);
+            return write(cur->next) + ret;
       }
       cur = cur->next;
    }
@@ -346,7 +352,9 @@ int NoVoHT::write(kvpair * p) {
 	write_lock = true;
 	fseek(dbfile, 0, SEEK_END);
 	fgetpos(dbfile, &(p->pos));
+        fprintf(stdout, "%s %lu\n", p->key.c_str(), (unsigned long)p->pos.__pos);
 	fprintf(dbfile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
+        fflush(dbfile);
 	write_lock = false;
 	return 0;
 }
