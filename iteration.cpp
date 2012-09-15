@@ -32,7 +32,8 @@
 
 int main(int argc, char **argv) {
 
-	NoVoHT *map = new NoVoHT("hash.table", 1000, 100);
+//	NoVoHT *map = new NoVoHT("hash.table", 1000, 100);
+	NoVoHT *map = new NoVoHT("hash.table");
 //	map->put("kevin", "hello");
 	map->put("kevin", "overwrite");
 	map->put("hello1", "zht1");
@@ -52,13 +53,12 @@ int main(int argc, char **argv) {
 	int i = 0;
 	pair_iterator kvi = map->pairIterator();
 	while (kvi.hasNext()) {
-		/*kvpair kv = kvi.next();
+		kvpair kv = kvi.next();
 		printf("The next key is %s\n", kv.key.c_str());
-		printf("The next value is %s\n", kv.val.c_str());*/
+		printf("The next value is %s\n", kv.val.c_str());
 
-		kvi.next();
+//		kvi.next();
 		//map->remove(kv.key);
-
 
 //		kvi.remove();
 	}
