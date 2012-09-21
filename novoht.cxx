@@ -226,7 +226,7 @@ int NoVoHT::append(string k, string aval){
       return write(cur) + ret;
    }
    while (cur != NULL){
-      if (cur->next == NULL) return ret-1;
+      if (cur->next == NULL) break;
       else if (k.compare(cur->next->key) == 0){
             fpos_t toRem = cur->next->pos;
             cur->next->val += ":" + aval;
@@ -244,7 +244,7 @@ int NoVoHT::append(string k, string aval){
    add->key = k;
    add->val = aval;
    add->next = NULL;
-   kvpairs[loc] = add;
+   cur->next = add;
    numEl++;
    map_lock = false;
    return write(add);
