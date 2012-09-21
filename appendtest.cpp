@@ -6,9 +6,6 @@
 
 int main (int argc, char ** argv){
    NoVoHT map("append.txt", 1000, -1);
-   map.put("one", "valone");
-   map.put("two", "valtwo");
-   map.put("three","valthree");
    map.append("two","appone");
    map.append("two", "apptwo");
    map.append("two", "appthree");
@@ -29,8 +26,6 @@ int main (int argc, char ** argv){
    map.append("three", "appthree");
    map.append("three", "applast");
    cout << map.getSize() << endl;
-
-   pause();
 
    return 0;
 }

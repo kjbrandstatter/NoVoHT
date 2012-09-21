@@ -202,8 +202,17 @@ int NoVoHT::append(string k, string aval){
    while(map_lock) { /* Wait for it... */ }
    int ret = 0;
    int loc = hash(k)%size;
-   kvpair *cur = kvpairs[loc];
-   if (cur == NULL) return ret-1; //Not Found
+   kvpair* cur = kvpairs[loc];
+   if (cur == NULL){
+      kvpair* add = new kvpair;
+      add->key = k;
+      add->val = aval;
+      add->next = NULL;
+      kvpairs[loc] = add;
+      numEl++;
+      map_lock = false;
+      return write(add);
+   }
    if (k.compare(cur->key) == 0){
       fpos_t toRem = cur->pos;
       cur->val += ":" + aval;
@@ -231,7 +240,14 @@ int NoVoHT::append(string k, string aval){
       }
       cur = cur->next;
    }
-   return -1; // Not found = append failed
+   kvpair* add = new kvpair;
+   add->key = k;
+   add->val = aval;
+   add->next = NULL;
+   kvpairs[loc] = add;
+   numEl++;
+   map_lock = false;
+   return write(add);
 }
 
 //return 0 if success -2 if failed
@@ -352,7 +368,6 @@ int NoVoHT::write(kvpair * p) {
 	write_lock = true;
 	fseek(dbfile, 0, SEEK_END);
 	fgetpos(dbfile, &(p->pos));
-        fprintf(stdout, "%s %lu\n", p->key.c_str(), (unsigned long)p->pos.__pos);
 	fprintf(dbfile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
         fflush(dbfile);
 	write_lock = false;
