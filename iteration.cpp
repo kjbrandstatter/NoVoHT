@@ -30,14 +30,15 @@
 
 #include "novoht.h"
 
-int main(int argc, char **argv) {
+void test() {
 
-	NoVoHT *map = new NoVoHT("hash.table", 1000, 100);
-//	map->put("kevin", "hello");
+	//	NoVoHT *map = new NoVoHT("hash.table", 1000, 100);
+	NoVoHT *map = new NoVoHT("hash.table");
+	//	map->put("kevin", "hello");
 	map->put("kevin", "overwrite");
 	map->put("hello1", "zht1");
 	map->put("hello2", "zht2");
-//	printf("The value is %s\n", (map->get("kevin"))->c_str());
+	//	printf("The value is %s\n", (map->get("kevin"))->c_str());
 
 	/*	key_iterator ki = map->keyIterator();
 	 while (ki.hasNext()) {
@@ -52,15 +53,14 @@ int main(int argc, char **argv) {
 	int i = 0;
 	pair_iterator kvi = map->pairIterator();
 	while (kvi.hasNext()) {
-		/*kvpair kv = kvi.next();
+		kvpair kv = kvi.next();
 		printf("The next key is %s\n", kv.key.c_str());
-		printf("The next value is %s\n", kv.val.c_str());*/
+		printf("The next value is %s\n", kv.val.c_str());
 
-		kvi.next();
+		//		kvi.next();
 		//map->remove(kv.key);
 
-
-//		kvi.remove();
+		//		kvi.remove();
 	}
 
 	printf("%s\n", "---------------");
@@ -92,6 +92,22 @@ int main(int argc, char **argv) {
 	 printf("The next value is %s\n",
 	 vi.hasNext() ? vi.next().c_str() : "no value");
 	 */
+}
+int main(int argc, char **argv) {
 
+	NoVoHT *map = new NoVoHT("./data/hash.table2");
+
+	map->put("kevin", "overwrite");
+	map->put("hello1", "zht1");
+	map->put("hello2", "zht2");
+
+	int i = 0;
+	pair_iterator kvi = map->pairIterator();
+	while (kvi.hasNext()) {
+		kvpair kv = kvi.next();
+		printf("The next key is %s\n", kv.key.c_str());
+		printf("The next value is %s\n", kv.val.c_str());
+
+	}
 }
 

@@ -39,6 +39,12 @@ NoVoHT::NoVoHT(){
  readFile();
  }
  */
+
+NoVoHT::NoVoHT(const string&f) {
+
+	new (this) NoVoHT(f, 1000, 100, 0.7);
+}
+
 NoVoHT::NoVoHT(const string& f, const int& s, const int& m) {
 	kvpairs = new kvpair*[s];
 	for (int x = 0; x < s; x++) {

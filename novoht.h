@@ -190,6 +190,7 @@ public:
 	NoVoHT();
 	//NoVoHT(int);
 	//NoVoHT(char *);
+	NoVoHT(const string&);
 	NoVoHT(const string&, const int&, const int&);
 	NoVoHT(const string&, const int&, const int&, const float&);
 	//NoVoHT(char *, NoVoHT*);
@@ -197,7 +198,7 @@ public:
 	int writeFile();
 	int put(string, string);
         int append(string,string);
-	string* get(string) ;
+	string* get(string);
 	int remove(string);
 	int getSize() const {
 		return numEl;
