@@ -160,6 +160,7 @@ class NoVoHT {
 	bool resizing;
 	bool map_lock;
 	bool write_lock;
+	bool rewriting;
 	int numEl;
 	FILE * dbfile;
 	string filename;
