@@ -212,6 +212,12 @@ public:
         static void* rewriteCaller(void* map){
            ((NoVoHT*)map)->rewriteFile(NULL);
            return NULL;}
+        bool isRewriting(void) { return rewriting; }
+        bool flushDBFile (void) {
+           if (!rewriting){
+              fflush(dbfile);
+           }
+        }
 };
 
 unsigned long long hash(string k);
