@@ -5,13 +5,15 @@ use Getopt::Long;
 
 my $in = '';
 my $out = '';
+my $type = 'UNDEF';
 my $result = GetOptions ("in=s" => \$in,
-                        "out=s" => \$out);
+                        "out=s" => \$out,
+                        "type=s" => \$type);
 open LOG, "<$in", or *LOG = *STDIN;
 open CSV, ">>", $out, or *CSV = *STDOUT;
 
 sub parray {
-   print CSV "$_[0],$_[1],$_[2],$_[3]\n";
+   print CSV "$type,$_[0],$_[1],$_[2],$_[3]\n";
 }
 my @entry;
 while (<LOG>){
