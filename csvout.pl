@@ -21,13 +21,13 @@ while (<LOG>){
    if ($_ =~ m/^(\d+)/i){
       $entry[0] = $1;
    }
-   if ($_ =~ m/^Insertion[^\d]*(\d+\.?\d*)/){
+   if ($_ =~ m/^Insertion[^\d]*(\d+\.?\d*(?:e\+\d+)?)/){
       $entry[1] = $1;
    }
-   if ($_ =~ m/^Retr[^\d]*(\d+\.?\d*)/){
+   if ($_ =~ m/^Retr[^\d]*(\d+\.?\d*(?:e\+\d+)?)/){
       $entry[2] = $1;
    }
-   if ($_ =~ m/^Removal[^\d]*(\d+\.?\d*)/){
+   if ($_ =~ m/^Removal[^\d]*(\d+\.?\d*(?:e\+\d+)?)/){
       $entry[3] = $1;
       parray @entry;
    }
