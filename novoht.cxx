@@ -222,6 +222,7 @@ int NoVoHT::append(string k, string aval){
    if (k.compare(cur->key) == 0){
       fpos_t toRem = cur->pos;
       cur->val += ":" + aval;
+      if (!dbfile) return 0;
       fseek(dbfile, -1, SEEK_END);
       if (((unsigned int)ftell(dbfile) - cur->val.size() - cur->key.size() + aval.size())
             == (unsigned int) (cur->pos.__pos)){
@@ -236,6 +237,7 @@ int NoVoHT::append(string k, string aval){
       else if (k.compare(cur->next->key) == 0){
             fpos_t toRem = cur->next->pos;
             cur->next->val += ":" + aval;
+            if (!dbfile) return 0;
             fseek(dbfile, -1, SEEK_END);
             if (((unsigned int)ftell(dbfile) - cur->val.size() - cur->key.size() + aval.size())
                   == (unsigned int) (cur->pos.__pos)){
