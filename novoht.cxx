@@ -63,6 +63,7 @@ NoVoHT::NoVoHT(const string& f, const int& s, const int& m) {
 	dbfile = fopen(f.c_str(), "r+");
 	if (!dbfile)
 		dbfile = fopen(f.c_str(), "w+");
+        //setbuf(dbfile, NULL);
 	readFile();
 	oldpairs = NULL;
 }
@@ -273,8 +274,12 @@ int NoVoHT::writeFile(){
    dbfile = fopen(".novoht.swp", "w+");
    nRem = 0;
    int rc = pthread_create(&writeThread, NULL, rewriteCaller, this);
-   if (rc)
+   if (rc){
       printf("Thread not created");
+      fclose(dbfile);
+      dbfile = swapFile;
+      rewriting = false;
+   }
    return rc;
 }
 
