@@ -17,6 +17,7 @@ NoVoHT::NoVoHT() {
 	map_lock = false;
 	write_lock = false;
 	resizing = false;
+	rewriting = false;
 	oldpairs = NULL;
 }
 
