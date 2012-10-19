@@ -16,7 +16,9 @@ double getTime_usec() {
    return static_cast<double>(tp.tv_sec) * 1E6+ static_cast<double>(tp.tv_usec);
 }
 int main (int argc, char ** argv){
-   NoVoHT map("append.txt", atoi(argv[1])*2, -1);
+   //NoVoHT map("append.txt", atoi(argv[1])*2, -1);
+   NoVoHT *map = new NoVoHT("append.txt", atoi(argv[1])*2,-1);
+   /*
    double a = getTime_usec();
    for (int i =0; i < atoi(argv[1])/2; i++){
       if (map.append("two","append") < 0)
@@ -27,14 +29,16 @@ int main (int argc, char ** argv){
    double b = getTime_usec();
    map.remove("two");
    map.remove("three");
+   */
    double c =getTime_usec();
    for (int i =0; i < atoi(argv[1]); i++){
-      if (map.append("two","append") < 0)
+      if (map->append("two","append") < 0)
          cerr << "Append Problem" << endl;
    }
    double d = getTime_usec();
-   cout << "Alternating appends " << (b - a)/1E3 << " milliseconds" << endl;
+   //cout << "Alternating appends " << (b - a)/1E3 << " milliseconds" << endl;
    cout << "Consecutive appends " << (d - c)/1E3 << " milliseconds" << endl;
 
+   delete map;
    return 0;
 }

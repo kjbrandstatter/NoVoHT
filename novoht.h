@@ -209,6 +209,8 @@ public:
 	key_iterator keyIterator();
 	val_iterator valIterator();
 	pair_iterator pairIterator();
+        bool isRewriting() {return rewriting; }
+        void flushDBFile() { fflush(dbfile); }
         static void* rewriteCaller(void* map){
            ((NoVoHT*)map)->rewriteFile(NULL);
            return NULL;}
