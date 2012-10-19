@@ -358,6 +358,16 @@ void fsu(kvpair* p) {
 	}
 }
 
+bool NoVoHT::isRewriting() const {
+
+	return rewriting;
+}
+
+int NoVoHT::flushDbfile() {
+
+	return fflush(dbfile);
+}
+
 key_iterator NoVoHT::keyIterator() {
 	return key_iterator(kvpairs, size, this);
 }
