@@ -42,7 +42,25 @@ NoVoHT::NoVoHT(){
 
 NoVoHT::NoVoHT(const string&f) {
 
-	new (this) NoVoHT(f, 1000, 100, 0.7);
+	size = 1000;
+	kvpairs = new kvpair*[size];
+	for (int x = 0; x < size; x++) {
+		kvpairs[x] = NULL;
+	}
+	resizing = false;
+	map_lock = false;
+	write_lock = false;
+	rewriting = false;
+	magicNumber = 1;
+	nRem = 0;
+	resizeNum = 0;
+	numEl = 0;
+	filename = f;
+	dbfile = fopen(f.c_str(), "r+");
+	if (!dbfile)
+		dbfile = fopen(f.c_str(), "w+");
+	readFile();
+	oldpairs = NULL;
 }
 
 NoVoHT::NoVoHT(const string& f, const int& s, const int& m) {
@@ -463,6 +481,16 @@ void fsu(kvpair* p) {
 		fsu(p->next);
 		delete p;
 	}
+}
+
+bool NoVoHT::isRewriting() const {
+
+	return rewriting;
+}
+
+int NoVoHT::flushDbfile() {
+
+	return fflush(dbfile);
 }
 
 key_iterator NoVoHT::keyIterator() {
