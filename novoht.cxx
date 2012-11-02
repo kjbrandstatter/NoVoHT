@@ -41,7 +41,6 @@ NoVoHT::NoVoHT(){
  */
 
 NoVoHT::NoVoHT(const string&f) {
-
 	size = 1000;
 	kvpairs = new kvpair*[size];
 	for (int x = 0; x < size; x++) {
@@ -82,7 +81,7 @@ NoVoHT::NoVoHT(const string& f, const int& s, const int& m) {
 	if (!dbfile)
 		dbfile = fopen(f.c_str(), "w+");
         //setbuf(dbfile, NULL);
-	readFile();
+	//readFile();
 	oldpairs = NULL;
 }
 
@@ -134,6 +133,7 @@ int NoVoHT::put(string k, string v) {
 	add->key = k;
 	add->val = v;
 	add->next = NULL;
+        add->positions = NULL;
 	if (cur == NULL) {
 		kvpairs[slot] = add;
 		numEl++;
@@ -143,7 +143,7 @@ int NoVoHT::put(string k, string v) {
 	while (cur->next != NULL) {
 		if (k.compare(cur->key) == 0) {
 			cur->val = v;
-			mark(cur->pos);
+			mark(cur->positions);
 			delete add;
 			map_lock = false;
 			return write(cur);
@@ -152,7 +152,7 @@ int NoVoHT::put(string k, string v) {
 	}
 	if (k.compare(cur->key) == 0) {
 		cur->val = v;
-		mark(cur->pos);
+		mark(cur->positions);
 		delete add;
 		map_lock = false;
 		return write(cur);
@@ -165,7 +165,7 @@ int NoVoHT::put(string k, string v) {
 
 NoVoHT::~NoVoHT(){
    if (dbfile){
-      writeFile();
+      //writeFile();
       pthread_join(writeThread, NULL);
       fclose(dbfile);
    }
@@ -196,7 +196,8 @@ int NoVoHT::remove(string k){
    kvpair *cur = kvpairs[loc];
    if (cur == NULL) return ret-1;       //not found
    if (k.compare(cur->key) ==0) {
-      fpos_t toRem = kvpairs[loc]->pos;
+      //fpos_t toRem = kvpairs[loc]->pos;
+      fpos_list * toRem = kvpairs[loc]->positions;
       kvpairs[loc] = cur->next;
       numEl--;
       ret= rewriting ? logrm(k, toRem) +ret : ret + mark(toRem);
@@ -210,7 +211,8 @@ int NoVoHT::remove(string k){
       else if (k.compare(cur->next->key)==0){
          kvpair *r = cur->next;
          cur->next = r->next;
-         fpos_t toRem = r->pos;
+      //   fpos_t toRem = r->pos;
+         struct fpos_list * toRem = kvpairs[loc]->positions;
          ret= rewriting ? logrm(k, toRem) +ret : ret + mark(toRem);
          delete r;
          numEl--;
@@ -223,55 +225,25 @@ int NoVoHT::remove(string k){
    return ret-1;        //not found
 }
 
+// Test
 int NoVoHT::append(string k, string aval){
    while(map_lock) { /* Wait for it... */ }
    int ret = 0;
    int loc = hash(k)%size;
    kvpair* cur = kvpairs[loc];
-   if (cur == NULL){
-      kvpair* add = new kvpair;
-      add->key = k;
-      add->val = aval;
-      add->next = NULL;
-      kvpairs[loc] = add;
-      numEl++;
-      map_lock = false;
-      return write(add);
-   }
-   if (k.compare(cur->key) == 0){
-      fpos_t toRem = cur->pos;
-      cur->val += ":" + aval;
-      if (!dbfile) return 0;
-      fseek(dbfile, -1, SEEK_END);
-      if (((unsigned int)ftell(dbfile) - cur->val.size() - cur->key.size() + aval.size())
-            == (unsigned int) (cur->pos.__pos)){
-         fprintf(dbfile, ":%s\t", aval.c_str());
-         return 0;
-      }
-      ret = rewriting ? logrm(k, toRem) + ret : mark(toRem);
-      return write(cur) + ret;
-   }
    while (cur != NULL){
-      if (cur->next == NULL) break;
-      else if (k.compare(cur->next->key) == 0){
-            fpos_t toRem = cur->next->pos;
-            cur->next->val += ":" + aval;
-            if (!dbfile) return 0;
-            fseek(dbfile, -1, SEEK_END);
-            if (((unsigned int)ftell(dbfile) - cur->val.size() - cur->key.size() + aval.size())
-                  == (unsigned int) (cur->pos.__pos)){
-               return fprintf(dbfile, ":%s\t", aval.c_str());
-            }
-            ret = rewriting ? logrm(k, toRem) +ret : mark(toRem);
-            return write(cur->next) + ret;
+      if (k.compare(cur->key) == 0){
+         cur->val += ":" + aval;
+         return writeAppend(cur, aval) + ret;
       }
       cur = cur->next;
    }
    kvpair* add = new kvpair;
    add->key = k;
    add->val = aval;
-   add->next = NULL;
-   cur->next = add;
+   add->next = kvpairs[loc];
+   add->positions = NULL;
+   kvpairs[loc] = add;
    numEl++;
    map_lock = false;
    return write(add);
@@ -279,6 +251,7 @@ int NoVoHT::append(string k, string aval){
 
 //return 0 if success -2 if failed
 //write hashmap to file
+//// Test
 int NoVoHT::writeFile(){
    while (write_lock){}
    if (!dbfile)return (filename.compare("") == 0 ? 0 : -2);
@@ -301,6 +274,7 @@ int NoVoHT::writeFile(){
    return rc;
 }
 
+// Fix
 void NoVoHT::rewriteFile(void *args){
    //write_lock=true;
    rewind(swapFile);
@@ -309,7 +283,10 @@ void NoVoHT::rewriteFile(void *args){
       kvpair *cur = kvpairs[i];
       while (cur != NULL){
          if(!cur->key.empty() && !cur->val.empty() && !cur->diff){
-                fgetpos(swapFile, &(cur->pos));
+            destroyFposList(cur->positions);
+            cur->positions = new fpos_list;
+            cur->positions->next = NULL;
+                fgetpos(swapFile, &(cur->positions->pos));
                 fprintf(swapFile, "%s\t%s\t", cur->key.c_str(), cur->val.c_str());
          }
          cur = cur->next;
@@ -319,6 +296,7 @@ void NoVoHT::rewriteFile(void *args){
    pthread_exit(NULL);
 }
 
+// Fix
 void NoVoHT::merge(){
    while(write_lock){}
    write_lock=true;
@@ -328,12 +306,17 @@ void NoVoHT::merge(){
    while (readTabString(dbfile,buf) != NULL){
       if(buf[0] == '~'){
          readTabString(dbfile, sec);
-         fseek(swapFile, (off_t) atoi(sec), SEEK_SET);
-         char test[300];
-         readTabString(swapFile,test);
-         if (strcmp(test,(buf+1)) == 0){
-                fseek(swapFile, (off_t) atoi(sec), SEEK_SET);
-                fputc('~',swapFile);
+         char * pos;
+         pos = strtok(sec, ",");
+         while (pos != NULL) {
+            fseek(swapFile, (off_t) atoi(pos), SEEK_SET);
+            char test[300];
+            readTabString(swapFile,test);
+            if (strcmp(test,(buf+1)) == 0){
+               fseek(swapFile, (off_t) atoi(pos), SEEK_SET);
+               fputc('~',swapFile);
+            }
+            pos = strtok(NULL, ",");
          }
       }
       else{
@@ -344,7 +327,10 @@ void NoVoHT::merge(){
          kvpair* p = kvpairs[hash(s)%size];
          while (p != NULL){
             if (p->key.compare(s) == 0){
-               fgetpos(swapFile, &(p->pos));
+               destroyFposList(p->positions);
+               p->positions = new fpos_list;
+               p->positions->next = NULL;
+               fgetpos(swapFile, &(p->positions->pos));
                fprintf(swapFile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
                p->diff = false;
                break;
@@ -391,6 +377,7 @@ void NoVoHT::resize(int ns) {
 
 //success 0 fail -2
 //write kvpair to file
+//Test
 int NoVoHT::write(kvpair * p) {
 	while (write_lock) {
 	}
@@ -398,33 +385,64 @@ int NoVoHT::write(kvpair * p) {
 		return (filename.compare("") == 0 ? 0 : -2);
 	write_lock = true;
 	fseek(dbfile, 0, SEEK_END);
-	fgetpos(dbfile, &(p->pos));
+        if (p->positions != NULL) destroyFposList(p->positions);
+        p->positions = new fpos_list;
+        p->positions->next = NULL;
+	fgetpos(dbfile, &(p->positions->pos));
 	fprintf(dbfile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
         fflush(dbfile);
 	write_lock = false;
 	return 0;
 }
 
-int NoVoHT::logrm(string key, fpos_t pos){
+//Test
+int NoVoHT::writeAppend(kvpair *p, string appendString){
+	while (write_lock) {
+	}
+	if (!dbfile)
+		return (filename.compare("") == 0 ? 0 : -2);
+	write_lock = true;
+	fseek(dbfile, 0, SEEK_END);
+        fpos_list * new_pos = new fpos_list;
+        new_pos->next = p->positions;
+        p->positions = new_pos;
+	fgetpos(dbfile, &(new_pos->pos));
+	fprintf(dbfile, "%s\t%s\t", p->key.c_str(), appendString.c_str());
+        fflush(dbfile);
+	write_lock = false;
+	return 0;
+}
+
+//Test
+int NoVoHT::logrm(string key, fpos_list * plist){
    while (write_lock){}
    write_lock = true;
    fseek(dbfile, 0, SEEK_END);
    fputc('~', dbfile);
-   fprintf(dbfile, "%s\t%ld\t", key.c_str(), pos.__pos);
+   fprintf(dbfile, "%s\t", key.c_str());
+   while (plist != NULL){
+      fprintf(dbfile, "%ld,", plist->pos.__pos );
+      plist = plist -> next;
+   }
+   fprintf(dbfile, "\t");
    write_lock = false;
    return 0;
 }
 
 //success 0 fail -2
 //mark line in file for deletion
-int NoVoHT::mark(fpos_t position) {
+// Test
+int NoVoHT::mark(fpos_list * plist) {
 	while (write_lock) {
 	}
 	if (!dbfile)
 		return (filename.compare("") == 0 ? 0 : -2);
 	write_lock = true;
-	fsetpos(dbfile, &position);
-	fputc((int) '~', dbfile);
+        while (plist != NULL){
+           fsetpos(dbfile, &(plist->pos));
+           fputc((int) '~', dbfile);
+           plist = plist -> next;
+        }
 	write_lock = false;
 	return 0;
 }
@@ -443,6 +461,7 @@ char *readTabString(FILE *file, char *buffer) {
 	return (n == 0 ? NULL : buffer);
 }
 
+// rewrite this shit
 void NoVoHT::readFile() {
 	if (!dbfile)
 		return;
@@ -481,6 +500,19 @@ void fsu(kvpair* p) {
 		fsu(p->next);
 		delete p;
 	}
+}
+
+void destroyFposList(fpos_list * list){
+   if (list == NULL) return;
+   destroyFposList(list->next);
+   delete list;
+   list = NULL;
+}
+
+void delete_kvpair(kvpair * redshirt){
+   destroyFposList(redshirt->positions);
+   delete redshirt;
+   redshirt = NULL;
 }
 
 bool NoVoHT::isRewriting() const {

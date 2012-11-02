@@ -5,14 +5,26 @@
 #include <stdio.h>
 using namespace std;
 
+struct fpos_list {
+   fpos_t pos;
+   struct fpos_list * next;
+};
+
+void destroyFposList(fpos_list * list);
+
+
 struct kvpair{
    struct kvpair * next;
    string key;
    string val;
    //int val;
-   fpos_t pos;
+   //fpos_t pos;
+   struct fpos_list * positions;
    bool diff;
 };
+
+// Delete ?
+void delete_kvpair(kvpair * redshirt);
 
 struct writeJob{
    pthread_t wjob;
@@ -178,14 +190,19 @@ class NoVoHT{
    int write(kvpair *);
    //void writeFile();
    void readFile();
-   int mark(fpos_t);
+   // Fix mark
+   int mark(struct fpos_list *);
    int magicNumber;
    float resizeNum;
    //writeJob* rewriteQueue;
+   //// Fix Merge
    void merge();
    pthread_t writeThread;
+   // Fix write
    void rewriteFile(void*);
-   int logrm(string, fpos_t);
+   //Fix logrm
+   int logrm(string, struct fpos_list *);
+   int writeAppend(kvpair *, string);
 public:
 	NoVoHT();
 	//NoVoHT(int);
