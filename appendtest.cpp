@@ -26,6 +26,7 @@ int main (int argc, char ** argv){
          cerr << "Append Problem" << endl;
    }
    double b = getTime_usec();
+   cout << "Alternating appends " << (b - a)/1E3 << " milliseconds" << endl;
    map->remove("two");
    map->remove("three");
    double c =getTime_usec();
@@ -34,9 +35,8 @@ int main (int argc, char ** argv){
          cerr << "Append Problem" << endl;
    }
    double d = getTime_usec();
-   cout << "Alternating appends " << (b - a)/1E3 << " milliseconds" << endl;
    cout << "Consecutive appends " << (d - c)/1E3 << " milliseconds" << endl;
 
-   //delete map;
+   delete map;
    return 0;
 }

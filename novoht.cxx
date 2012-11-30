@@ -32,6 +32,8 @@ void NoVoHT::initialize(const string& fname, const int& initSize,
 	for (int x = 0; x < initSize; x++) {
 		kvpairs[x] = NULL;
 	}
+        sem_init(&map_lock, 0, 1);
+        sem_init(&write_lock, 0, 1);
 	resizing = false;
 	//map_lock = false;
 	//write_lock = false;
@@ -47,8 +49,6 @@ void NoVoHT::initialize(const string& fname, const int& initSize,
 		dbfile = fopen(filename.c_str(), "w+");
 	readFile();
 	oldpairs = NULL;
-        sem_init(&map_lock, 0, 1);
-        sem_init(&write_lock, 0, 1);
 }
 
 //0 success, -1 no insert, -2 no write
