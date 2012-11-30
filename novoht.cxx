@@ -33,8 +33,8 @@ void NoVoHT::initialize(const string& fname, const int& initSize,
 		kvpairs[x] = NULL;
 	}
 	resizing = false;
-	map_lock = false;
-	write_lock = false;
+	//map_lock = false;
+	//write_lock = false;
         rewriting = false;
 	magicNumber = gcnum;
 	nRem = 0;
@@ -47,14 +47,16 @@ void NoVoHT::initialize(const string& fname, const int& initSize,
 		dbfile = fopen(filename.c_str(), "w+");
 	readFile();
 	oldpairs = NULL;
+        sem_init(&map_lock, 0, 1);
+        sem_init(&write_lock, 0, 1);
 }
 
 //0 success, -1 no insert, -2 no write
 int NoVoHT::put(string k, string v) {
 	//while(resizing || map_lock){ /* Wait till done */}
-	while (map_lock) {
-	}
-	map_lock = true;
+	//while (map_lock) {}
+	//map_lock = true;
+        sem_wait(&map_lock);
 	if (numEl >= size * resizeNum) {
 		if (resizeNum != 0) {
 			resize(size * 2);
@@ -71,7 +73,8 @@ int NoVoHT::put(string k, string v) {
 	if (cur == NULL) {
 		kvpairs[slot] = add;
 		numEl++;
-		map_lock = false;
+		//map_lock = false;
+                sem_post(&map_lock);
 		return write(add);
 	}
 	while (cur->next != NULL) {
@@ -79,7 +82,8 @@ int NoVoHT::put(string k, string v) {
 			cur->val = v;
 			mark(cur->positions);
 			delete add;
-			map_lock = false;
+			//map_lock = false;
+                        sem_post(&map_lock);
 			return write(cur);
 		}
 		cur = cur->next;
@@ -88,12 +92,14 @@ int NoVoHT::put(string k, string v) {
 		cur->val = v;
 		mark(cur->positions);
 		delete add;
-		map_lock = false;
+		//map_lock = false;
+                sem_post(&map_lock);
 		return write(cur);
 	}
 	cur->next = add;
 	numEl++;
-	map_lock = false;
+	//map_lock = false;
+        sem_post(&map_lock);
 	return write(add);
 }
 
@@ -111,8 +117,9 @@ NoVoHT::~NoVoHT(){
 }
 
 string* NoVoHT::get(string k) {
-	while (map_lock) { /* Wait till done */
-	}
+	//while (map_lock) { /* Wait till done */
+        sem_wait(&map_lock);
+        sem_post(&map_lock);
 	int loc = hash(k) % size;
 	kvpair *cur = kvpairs[loc];
 	while (cur != NULL && !k.empty()) {
@@ -125,7 +132,8 @@ string* NoVoHT::get(string k) {
 
 //return 0 for success, -1 fail to remove, -2+ write failure
 int NoVoHT::remove(string k){
-   while(map_lock){ /* Wait till done */}
+   //while(map_lock){ /* Wait till done */}
+   sem_wait(&map_lock);
    int ret =0;
    int loc = hash(k)%size;
    kvpair *cur = kvpairs[loc];
@@ -139,6 +147,7 @@ int NoVoHT::remove(string k){
       delete cur;
       nRem++;
       if (nRem == magicNumber) ret+=writeFile(); //write and save write success
+      sem_post(&map_lock);
       return ret;
    }
    while(cur != NULL){
@@ -153,22 +162,26 @@ int NoVoHT::remove(string k){
          numEl--;
          nRem++;
          if (nRem == magicNumber) ret+=writeFile();              //mark and sace status code
+         sem_post(&map_lock);
          return ret;
       }
       cur = cur->next;
    }
+   sem_post(&map_lock);
    return ret-1;        //not found
 }
 
 // Test
 int NoVoHT::append(string k, string aval){
-   while(map_lock) { /* Wait for it... */ }
+   //while(map_lock) { /* Wait for it... */ }
+   sem_wait(&map_lock);
    int ret = 0;
    int loc = hash(k)%size;
    kvpair* cur = kvpairs[loc];
    while (cur != NULL){
       if (k.compare(cur->key) == 0){
          cur->val += ":" + aval;
+         sem_post(&map_lock);
          return writeAppend(cur, aval) + ret;
       }
       cur = cur->next;
@@ -180,7 +193,8 @@ int NoVoHT::append(string k, string aval){
    add->positions = NULL;
    kvpairs[loc] = add;
    numEl++;
-   map_lock = false;
+   //map_lock = false;
+   sem_post(&map_lock);
    return write(add);
 }
 
@@ -188,13 +202,16 @@ int NoVoHT::append(string k, string aval){
 //write hashmap to file
 //// Test
 int NoVoHT::writeFile(){
-   while (write_lock){}
-   if (!dbfile)return (filename.compare("") == 0 ? 0 : -2);
+   //while (write_lock){}
+   if (!dbfile) {
+      return (filename.compare("") == 0 ? 0 : -2);
+   }
    if (rewriting) {
       //pthread_join(writeThread, NULL);
       nRem = 0;
       return 0;
    }
+   sem_wait(&write_lock);
    rewriting = true;
    swapFile = dbfile;
    dbfile = fopen(".novoht.swp", "w+");
@@ -206,6 +223,7 @@ int NoVoHT::writeFile(){
       dbfile = swapFile;
       rewriting = false;
    }
+   sem_post(&write_lock);
    return rc;
 }
 
@@ -233,8 +251,9 @@ void NoVoHT::rewriteFile(void *args){
 
 // Fix
 void NoVoHT::merge(){
-   while(write_lock){}
-   write_lock=true;
+   //while(write_lock){}
+   //write_lock=true;
+   sem_wait(&write_lock);
    char buf[300];
    char sec[300];
    rewind(dbfile);
@@ -255,8 +274,9 @@ void NoVoHT::merge(){
          }
       }
       else{
-         while (map_lock) {}
-         map_lock = true;
+         //while (map_lock) {}
+         //map_lock = true;
+         sem_wait(&map_lock);
          fseek(swapFile, 0, SEEK_END);
          string s(buf);
          kvpair* p = kvpairs[hash(s)%size];
@@ -273,7 +293,8 @@ void NoVoHT::merge(){
             else
                p = p->next;
          }
-         map_lock = false;
+         //map_lock = false;
+         sem_post(&map_lock);
       }
    }
    FILE *tmp = dbfile;
@@ -281,7 +302,8 @@ void NoVoHT::merge(){
    fclose(tmp);
    remove(".novoht.swp");
    rewriting = false;
-   write_lock = false;
+   //write_lock = false;
+   sem_post(&write_lock);
 }
 
 //success 0 fail -2
@@ -314,11 +336,11 @@ void NoVoHT::resize(int ns) {
 //write kvpair to file
 //Test
 int NoVoHT::write(kvpair * p) {
-	while (write_lock) {
-	}
+	//while (write_lock) {
 	if (!dbfile)
 		return (filename.compare("") == 0 ? 0 : -2);
-	write_lock = true;
+	//write_lock = true;
+        sem_wait(&write_lock);
 	fseek(dbfile, 0, SEEK_END);
         if (p->positions != NULL) destroyFposList(p->positions);
         p->positions = new fpos_list;
@@ -326,17 +348,19 @@ int NoVoHT::write(kvpair * p) {
 	fgetpos(dbfile, &(p->positions->pos));
 	fprintf(dbfile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
         fflush(dbfile);
-	write_lock = false;
+	//write_lock = false;
+        sem_post(&write_lock);
 	return 0;
 }
 
 //Test
 int NoVoHT::writeAppend(kvpair *p, string appendString){
-	while (write_lock) {
-	}
+	//while (write_lock) {
+	//}
 	if (!dbfile)
 		return (filename.compare("") == 0 ? 0 : -2);
-	write_lock = true;
+	//write_lock = true;
+        sem_wait(&write_lock);
 	fseek(dbfile, 0, SEEK_END);
         fpos_list * new_pos = new fpos_list;
         new_pos->next = p->positions;
@@ -344,14 +368,16 @@ int NoVoHT::writeAppend(kvpair *p, string appendString){
 	fgetpos(dbfile, &(new_pos->pos));
 	fprintf(dbfile, "%s\t%s\t", p->key.c_str(), appendString.c_str());
         fflush(dbfile);
-	write_lock = false;
+	//write_lock = false;
+        sem_post(&write_lock);
 	return 0;
 }
 
 //Test
 int NoVoHT::logrm(string key, fpos_list * plist){
-   while (write_lock){}
-   write_lock = true;
+   //while (write_lock){}
+   //write_lock = true;
+   sem_wait(&write_lock);
    fseek(dbfile, 0, SEEK_END);
    fputc('~', dbfile);
    fprintf(dbfile, "%s\t", key.c_str());
@@ -360,7 +386,8 @@ int NoVoHT::logrm(string key, fpos_list * plist){
       plist = plist -> next;
    }
    fprintf(dbfile, "\t");
-   write_lock = false;
+   //write_lock = false;
+   sem_post(&write_lock);
    return 0;
 }
 
@@ -368,17 +395,18 @@ int NoVoHT::logrm(string key, fpos_list * plist){
 //mark line in file for deletion
 // Test
 int NoVoHT::mark(fpos_list * plist) {
-	while (write_lock) {
-	}
+	//while (write_lock) {
 	if (!dbfile)
 		return (filename.compare("") == 0 ? 0 : -2);
-	write_lock = true;
+	//write_lock = true;
+        sem_wait(&write_lock);
         while (plist != NULL){
            fsetpos(dbfile, &(plist->pos));
            fputc((int) '~', dbfile);
            plist = plist -> next;
         }
-	write_lock = false;
+	//write_lock = false;
+        sem_post(&write_lock);
 	return 0;
 }
 char *readTabString(FILE *file, char *buffer) {

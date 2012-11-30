@@ -2,6 +2,7 @@
 #define PHASHMAP_H
 #include "novoht.h"
 #include <string>
+#include <semaphore.h>
 #include <stdio.h>
 using namespace std;
 
@@ -177,8 +178,10 @@ class NoVoHT{
    kvpair** kvpairs;
    kvpair** oldpairs;
    bool resizing;
-   bool map_lock;
-   bool write_lock;
+   //bool map_lock;
+   sem_t map_lock;
+   //bool write_lock;
+   sem_t write_lock;
    bool rewriting;
    int numEl;
    FILE * dbfile;
