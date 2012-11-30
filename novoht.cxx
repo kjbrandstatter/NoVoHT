@@ -56,6 +56,10 @@ int NoVoHT::put(string k, string v) {
 	//while(resizing || map_lock){ /* Wait till done */}
 	//while (map_lock) {}
 	//map_lock = true;
+        //
+        //int semv;
+        //sem_getvalue(&map_lock, &semv);
+        //printf("semv = %d\n", semv);
         sem_wait(&map_lock);
 	if (numEl >= size * resizeNum) {
 		if (resizeNum != 0) {
@@ -137,7 +141,10 @@ int NoVoHT::remove(string k){
    int ret =0;
    int loc = hash(k)%size;
    kvpair *cur = kvpairs[loc];
-   if (cur == NULL) return ret-1;       //not found
+   if (cur == NULL) {
+      sem_post(&map_lock);
+      return ret-1;       //not found
+   }
    if (k.compare(cur->key) ==0) {
       //fpos_t toRem = kvpairs[loc]->pos;
       fpos_list * toRem = kvpairs[loc]->positions;
@@ -151,7 +158,11 @@ int NoVoHT::remove(string k){
       return ret;
    }
    while(cur != NULL){
-      if (cur->next == NULL) return ret-1;
+      if (cur->next == NULL){
+         sem_post(&map_lock);
+         return ret-1;
+      }
+
       else if (k.compare(cur->next->key)==0){
          kvpair *r = cur->next;
          cur->next = r->next;
@@ -337,6 +348,9 @@ void NoVoHT::resize(int ns) {
 //Test
 int NoVoHT::write(kvpair * p) {
 	//while (write_lock) {
+        //int semv;
+        //sem_getvalue(&map_lock, &semv);
+        //printf("released = %d\n", semv);
 	if (!dbfile)
 		return (filename.compare("") == 0 ? 0 : -2);
 	//write_lock = true;
