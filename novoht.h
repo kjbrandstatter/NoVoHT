@@ -210,6 +210,7 @@ public:
 	NoVoHT(const string&);
 	NoVoHT(const string&, const int&, const int&);
 	NoVoHT(const string&, const int&, const int&, const float&);
+	void initialize(const string&, const int&, const int&, const float&);
 	//NoVoHT(char *, NoVoHT*);
 	~NoVoHT();
 	int writeFile();

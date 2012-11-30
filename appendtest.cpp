@@ -37,6 +37,6 @@ int main (int argc, char ** argv){
    cout << "Alternating appends " << (b - a)/1E3 << " milliseconds" << endl;
    cout << "Consecutive appends " << (d - c)/1E3 << " milliseconds" << endl;
 
-   delete map;
+   //delete map;
    return 0;
 }

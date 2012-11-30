@@ -10,110 +10,44 @@
 #include "novoht.h"
 
 NoVoHT::NoVoHT(){
-   kvpairs = new kvpair*[1000];
-   size = 1000;
-   numEl = 0;
-   magicNumber = 1000;
-   resizeNum = -1;
-   resizing=false;
-   map_lock=false;
-   write_lock=false;
-   resizing = false;
-   rewriting = false;
-   oldpairs = NULL;
+   initialize("", 1000, -1, 0);
 }
 
-/*
- NoVoHT::NoVoHT(int s){
- kvpairs = new kvpair*[s];
- size = s;
- numEl=0;
- file = NULL;
- }
-
- NoVoHT::NoVoHT(char * f){
- kvpairs = new kvpair*[1000];
- size = 1000;
- numEl=0;
- file = f;
- readFile();
- }
- */
-
-NoVoHT::NoVoHT(const string&f) {
-	size = 1000;
-	kvpairs = new kvpair*[size];
-	for (int x = 0; x < size; x++) {
-		kvpairs[x] = NULL;
-	}
-	resizing = false;
-	map_lock = false;
-	write_lock = false;
-	rewriting = false;
-	magicNumber = 1;
-	nRem = 0;
-	resizeNum = 0;
-	numEl = 0;
-	filename = f;
-	dbfile = fopen(f.c_str(), "r+");
-	if (!dbfile)
-		dbfile = fopen(f.c_str(), "w+");
-	readFile();
-	oldpairs = NULL;
+NoVoHT::NoVoHT(const string& f) {
+   initialize(f, 1000, -1, 0);
 }
 
 NoVoHT::NoVoHT(const string& f, const int& s, const int& m) {
-	kvpairs = new kvpair*[s];
-	for (int x = 0; x < s; x++) {
-		kvpairs[x] = NULL;
-	}
-	resizing = false;
-	map_lock = false;
-	write_lock = false;
-        rewriting = false;
-	magicNumber = m;
-	nRem = 0;
-	resizeNum = 0;
-	size = s;
-	numEl = 0;
-	filename = f;
-	dbfile = fopen(f.c_str(), "r+");
-	if (!dbfile)
-		dbfile = fopen(f.c_str(), "w+");
-        //setbuf(dbfile, NULL);
-	//readFile();
-	oldpairs = NULL;
+   initialize(f, s, m, 0);
 }
 
+// NoVoHT( Filename, size, magic number, resize threashold )
 NoVoHT::NoVoHT(const string& f, const int& s, const int& m, const float& r) {
-	kvpairs = new kvpair*[s];
-	for (int x = 0; x < s; x++) {
+   initialize(f, s, m, r);
+}
+
+void NoVoHT::initialize(const string& fname, const int& initSize,
+        const int& gcnum, const float& resizeRatio){
+	kvpairs = new kvpair*[initSize];
+	for (int x = 0; x < initSize; x++) {
 		kvpairs[x] = NULL;
 	}
 	resizing = false;
 	map_lock = false;
 	write_lock = false;
         rewriting = false;
-	magicNumber = m;
+	magicNumber = gcnum;
 	nRem = 0;
-	resizeNum = r;
-	size = s;
+	resizeNum = resizeRatio;
+	size = initSize;
 	numEl = 0;
-	filename = f;
-	dbfile = fopen(f.c_str(), "r+");
+	filename = fname;
+	dbfile = fopen(filename.c_str(), "r+");
 	if (!dbfile)
-		dbfile = fopen(f.c_str(), "w+");
+		dbfile = fopen(filename.c_str(), "w+");
 	readFile();
 	oldpairs = NULL;
 }
-/*
- NoVoHT::NoVoHT(char * f, NoVoHT *map){
- kvpairs = new kvpair*[1000];
- size = 1000;
- numEl=0;
- file = f;
- readFile();
- }*/
 
 //0 success, -1 no insert, -2 no write
 int NoVoHT::put(string k, string v) {
@@ -165,8 +99,9 @@ int NoVoHT::put(string k, string v) {
 
 NoVoHT::~NoVoHT(){
    if (dbfile){
-      //writeFile();
-      pthread_join(writeThread, NULL);
+      writeFile();
+      if (writeThread)
+         pthread_join(writeThread, NULL);
       fclose(dbfile);
    }
    for (int i = 0; i < size; i++){
