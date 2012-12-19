@@ -1,8 +1,8 @@
-class is phashmap.
+class is NoVoHT.
 to create an instance the constructor is:
 
-phashmap(char* filename, int size, int rewrite) OR
-phashmap(char* filename, int size, int rewrite, float resize)
+NoVoHT(string filename, int size, int rewrite) OR
+NoVoHT(string filename, int size, int rewrite, float resize)
 
 where filename is the file to write persistant version to,
         set this to NULL for no persistance.
@@ -16,7 +16,7 @@ source code.
 
 
 standard hash table methods
-put(key, value) where key is char* and value is int (i can change this if
+put(key, value) where key is string and value is int (i can change this if
         necessary)
         0 = success
         -1 = didnt insert/failed
@@ -39,21 +39,23 @@ getCap() returns number of buckets in the base array of the map.
 
 Documentation:
 
-phashmap(char* filename, int size, int rewrite) OR
-phashmap(char* filename, int size, int rewrite, float resize)
+NoVoHT(string filename, int size, int rewrite) OR
+NoVoHT(string filename, int size, int rewrite, float resize)
         filename = persistent file (empty string for no persistance)
         size = initial number of slots in map
         rewrite = number of removes before garbage collection (-1 to not rewrite based on number of removals)
         resize = percentage of size before size is doubled
 
-int put(char* key, char* val)
+int put(string key, string val)
         returns 0 if succesful -1 if it fails, and -2 if it fails to write
 
-*string get(char* key)
+*string get(string key)
         returns pointer to string value, or NULL if not found
 
-int remove(char* key)
+int remove(string key)
         returns 0 if succesful -1 if it fails, and -2 if it fails to write
+
+int append(string key, string val)
 
 writeFile()
         writes file. best used on a timer
