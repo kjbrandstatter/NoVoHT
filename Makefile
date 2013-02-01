@@ -1,49 +1,46 @@
 PROJECT=HashTable
 CC=g++
-CFLAGS=-c -Wall
-LDFLAGS=-I -lpthread
-SOURCE=hashmap.cxx main.cxx
-OBJECTS=novoht.o main.o
-HEADERS=novoht.h
+CFLAGS=-Wall
 BINS=fbench pbench
+
+SRCDIR=src
+BINDIR=bin
+TESTDIR=tests
+LIBDIR=lib
+
+OBJECTS=novoht.o
+LDFLAGS=-I$(SRCDIR) -lpthread
+
+.SUFFIXES:
+.SUFFIXES: .c .cxx .o
 
 all: $(BINS)
 
-pbench: novoht.o pbench.cpp
-	$(CC) novoht.o pbench.cpp -o pbench -lpthread
+%.o : $(SRCDIR)/%.cxx
+	$(CC) $(CFLAGS) -c $< -o $(SRCDIR)/$@
 
-fbench: novoht.o fbench.cxx
-	$(CC) novoht.o fbench.cxx -o fbench -lpthread
+pbench: $(OBJECTS) $(TESTDIR)/pbench.cpp
+	[[ -d $(BINDIR) ]] || mkdir -p $(BINDIR)
+	$(CC) $(SRCDIR)/novoht.o $(TESTDIR)/pbench.cpp -o $(BINDIR)/pbench $(LDFLAGS)
 
-gpbbench: novoht.o gpbbench.cxx
-	$(CC) novoht.o gpbbench.cxx -o gpbbench -lz -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc meta.pb.cc
+fbench: $(OBJECTS) $(TESTDIR)/fbench.cxx
+	[[ -d $(BINDIR) ]] || mkdir -p $(BINDIR)
+	$(CC) $(SRCDIR)/novoht.o $(TESTDIR)/fbench.cxx -o $(BINDIR)/fbench $(LDFLAGS)
 
-kbench: novoht.o kbench.cxx
-	$(CC) novoht.o kbench.cxx -o kbench
+gpbbench: $(OBJECTS) $(TESTDIR)/gpbbench.cxx
+	$(CC) $(SRCDIR)/novoht.o $(TESTDIR)/gpbbench.cxx -o $(BINDIR)/gpbbench -lz -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc meta.pb.cc $(LDFLAGS)
 
-tonybench: novoht.o test_hash.cpp
-	$(CC) novoht.o test_hash.cpp -o tonybench
-
-appendtest: novoht.o appendtest.cpp
-	$(CC) novoht.o appendtest.cpp -o appendtest -lpthread
-
-libnovoht: novoht.o
-	g++ $(CFLAGS) -fPIC -o novoht.obj novoht.cxx
-	g++ -shared -o libnovoht.so novoht.obj
-	rm novoht.obj
-	rm -f libnovoht.a
-	ar -cvq libnovoht.a novoht.o
-
-novoht.o: novoht.cxx
-	$(CC) $(CFLAGS) novoht.cxx
+appendtest: $(OBJECTS) $(TESTDIR)/appendtest.cpp
+	$(CC) $(SRCDIR)/novoht.o $(TESTDIR)/appendtest.cpp -o $(BINDIR)/appendtest -lpthread $(LDFLAGS)
+#
+libnovoht: $(OBJECTS)
+	rm -rf $(LIBDIR)
+	mkdir -p $(LIBDIR)
+	g++ $(CFLAGS) -c -fPIC -o $(SRCDIR)/novoht.obj $(SRCDIR)/novoht.cxx $(LDFLAGS)
+	g++ -shared -o $(LIBDIR)/libnovoht.so $(SRCDIR)/novoht.obj
+	rm $(SRCDIR)/novoht.obj
+	ar -cvq $(LIBDIR)/libnovoht.a $(SRCDIR)/novoht.o
 
 clean:
-	rm *.o $(BINS)
-
-rebuild: clean
-
-test_fbench: fbench
-	./fbench 1000000 fbench.data
-
-test_pbench: pbench
-	./pbench 4096 pbench.data
+	rm -f $(SRCDIR)/*.o
+	rm -rv $(BINDIR) $(LIBDIR)
