@@ -18,18 +18,17 @@ double getTime_usec() {
 int main (int argc, char ** argv){
    //NoVoHT map("append.txt", atoi(argv[1])*2, -1);
    NoVoHT *map = new NoVoHT("append.txt", atoi(argv[1])*2,-1);
-   /*
    double a = getTime_usec();
    for (int i =0; i < atoi(argv[1])/2; i++){
-      if (map.append("two","append") < 0)
+      if (map->append("two","append") < 0)
          cerr << "Append Problem" << endl;
-      if (map.append("three","Append") < 0)
+      if (map->append("three","Append") < 0)
          cerr << "Append Problem" << endl;
    }
    double b = getTime_usec();
-   map.remove("two");
-   map.remove("three");
-   */
+   cout << "Alternating appends " << (b - a)/1E3 << " milliseconds" << endl;
+   map->remove("two");
+   map->remove("three");
    double c =getTime_usec();
    for (int i =0; i < atoi(argv[1]); i++){
       if (map->append("two","append") < 0)

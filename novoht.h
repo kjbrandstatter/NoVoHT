@@ -2,17 +2,30 @@
 #define PHASHMAP_H
 #include "novoht.h"
 #include <string>
+#include <semaphore.h>
 #include <stdio.h>
 using namespace std;
+
+struct fpos_list {
+   fpos_t pos;
+   struct fpos_list * next;
+};
+
+void destroyFposList(fpos_list * list);
+
 
 struct kvpair{
    struct kvpair * next;
    string key;
    string val;
    //int val;
-   fpos_t pos;
+   //fpos_t pos;
+   struct fpos_list * positions;
    bool diff;
 };
+
+// Delete ?
+void delete_kvpair(kvpair * redshirt);
 
 struct writeJob{
    pthread_t wjob;
@@ -165,8 +178,10 @@ class NoVoHT{
    kvpair** kvpairs;
    kvpair** oldpairs;
    bool resizing;
-   bool map_lock;
-   bool write_lock;
+   //bool map_lock;
+   sem_t map_lock;
+   //bool write_lock;
+   sem_t write_lock;
    bool rewriting;
    int numEl;
    FILE * dbfile;
@@ -178,14 +193,19 @@ class NoVoHT{
    int write(kvpair *);
    //void writeFile();
    void readFile();
-   int mark(fpos_t);
+   // Fix mark
+   int mark(struct fpos_list *);
    int magicNumber;
    float resizeNum;
    //writeJob* rewriteQueue;
+   //// Fix Merge
    void merge();
    pthread_t writeThread;
+   // Fix write
    void rewriteFile(void*);
-   int logrm(string, fpos_t);
+   //Fix logrm
+   int logrm(string, struct fpos_list *);
+   int writeAppend(kvpair *, string);
 public:
 	NoVoHT();
 	//NoVoHT(int);
@@ -193,6 +213,7 @@ public:
 	NoVoHT(const string&);
 	NoVoHT(const string&, const int&, const int&);
 	NoVoHT(const string&, const int&, const int&, const float&);
+	void initialize(const string&, const int&, const int&, const float&);
 	//NoVoHT(char *, NoVoHT*);
 	~NoVoHT();
 	int writeFile();

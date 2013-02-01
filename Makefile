@@ -1,5 +1,5 @@
 PROJECT=HashTable
-CC=g++
+CC=/usr/lib/distcc/bin/g++
 CFLAGS=-c -Wall
 LDFLAGS=-I -lpthread
 SOURCE=hashmap.cxx main.cxx
