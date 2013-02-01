@@ -36,7 +36,8 @@ int main (int argc, char ** argv){
          cerr << "Append Problem" << endl;
    }
    double d = getTime_usec();
-   //cout << "Alternating appends " << (b - a)/1E3 << " milliseconds" << endl;
+   cout << "Number of appends " << argv[1] << endl;
+   cout << "Alternating appends " << (b - a)/1E3 << " milliseconds" << endl;
    cout << "Consecutive appends " << (d - c)/1E3 << " milliseconds" << endl;
 
    delete map;

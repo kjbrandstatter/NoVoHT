@@ -38,7 +38,7 @@ hybrid_persistence
 
 function all {
 basic
-ssd_persistent
+extra
 }
 
 [[ $# -gt 0 ]] && $1 || echo Invalid Benchmark
