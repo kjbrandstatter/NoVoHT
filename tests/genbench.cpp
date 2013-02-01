@@ -56,7 +56,7 @@ double testInsert(HashMap *map, string keys[], string vals[], int l){
    double a = getTime_usec();
    int t;
    for (t = 0; t<l; t++){
-      fails -= map->put(keys[t], vals[t]);
+      if (!map->put(keys[t], vals[t])) fails++;
       if ((t+1)%1000 == 0)
          cerr << (long)t*100/l << "\% Complete\r";
    }
@@ -88,7 +88,7 @@ double testRemove(HashMap *map, string keys[], int l){
    cerr.flush();
    double a = getTime_usec();
    for (int t=0; t<l; t++){
-      fails -= map->remove(keys[t]);
+      if (!map->remove(keys[t])) fails++;
       if ((t+1)%1000 == 0)cerr << (long)t*100/l << "\% Complete\r";
    }
    double b = getTime_usec();

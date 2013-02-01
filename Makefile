@@ -1,7 +1,7 @@
 PROJECT=HashTable
 CC=g++
 CFLAGS=-Wall
-BINS=fbench pbench
+BINS=fbench pbench genbench
 
 SRCDIR=src
 BINDIR=bin
@@ -28,6 +28,7 @@ gpbbench: $(OBJECTS) $(TESTDIR)/gpbbench.cxx
 	$(CC) $(SRCDIR)/novoht.o $(TESTDIR)/gpbbench.cxx -o $(BINDIR)/gpbbench -lz -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc meta.pb.cc $(LDFLAGS)
 
 genbench: $(OBJECTS) $(TESTDIR)/genbench.cpp
+	[[ -d $(BINDIR) ]] || mkdir -p $(BINDIR)
 	$(CC) $(SRCDIR)/novoht.o $(TESTDIR)/genbench.cpp -I$(TESTDIR) $(LDFLAGS) -o $(BINDIR)/genbench
 
 appendtest: $(OBJECTS) $(TESTDIR)/appendtest.cpp
