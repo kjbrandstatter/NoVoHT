@@ -239,13 +239,7 @@ public:
         void flushDBFile() { fflush(dbfile); }
         static void* rewriteCaller(void* map){
            ((NoVoHT*)map)->rewriteFile(NULL);
-           return NULL;}
-        bool isRewriting(void) { return rewriting; }
-        bool flushDBFile (void) {
-           if (!rewriting){
-              fflush(dbfile);
-           }
-        }
+			  return NULL;}
 };
 
 unsigned long long hash(string k);
