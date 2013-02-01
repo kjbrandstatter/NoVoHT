@@ -11,9 +11,6 @@ LIBDIR=lib
 OBJECTS=novoht.o
 LDFLAGS=-I$(SRCDIR) -lpthread
 
-.SUFFIXES:
-.SUFFIXES: .c .cxx .o
-
 all: $(BINS)
 
 %.o : $(SRCDIR)/%.cxx
@@ -29,6 +26,9 @@ fbench: $(OBJECTS) $(TESTDIR)/fbench.cxx
 
 gpbbench: $(OBJECTS) $(TESTDIR)/gpbbench.cxx
 	$(CC) $(SRCDIR)/novoht.o $(TESTDIR)/gpbbench.cxx -o $(BINDIR)/gpbbench -lz -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc meta.pb.cc $(LDFLAGS)
+
+genbench: $(OBJECTS) $(TESTDIR)/genbench.cpp
+	$(CC) $(SRCDIR)/novoht.o $(TESTDIR)/genbench.cpp -I$(TESTDIR) $(LDFLAGS) -o $(BINDIR)/genbench
 
 appendtest: $(OBJECTS) $(TESTDIR)/appendtest.cpp
 	$(CC) $(SRCDIR)/novoht.o $(TESTDIR)/appendtest.cpp -o $(BINDIR)/appendtest -lpthread $(LDFLAGS)
