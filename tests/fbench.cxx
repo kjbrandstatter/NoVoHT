@@ -116,7 +116,7 @@ int main(int argc, char *argv[]){
    if(argc > 2) fn = argv[2];
    //NoVoHT map (fn, size, 10000, .7);
    //NoVoHT map (fn, size, 10000);
-   NoVoHT map (fn, size, -1);
+   NoVoHT map (fn, size, 1000);
    //NoVoHT map (fn, size, 100, .7);
    stat(fn, &fstate);
    cout << "Initial file size: " << fstate.st_size << endl << endl;

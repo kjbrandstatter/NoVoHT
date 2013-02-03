@@ -23,6 +23,7 @@
 #include <iostream>
 #include <pthread.h>
 #include "novoht.h"
+#define DEBUG	TRUE
 
 NoVoHT::NoVoHT(){
    initialize("", 1000, -1, 0);
@@ -128,6 +129,7 @@ NoVoHT::~NoVoHT(){
       if (writeThread)
          pthread_join(writeThread, NULL);
       fclose(dbfile);
+		remove(".novoht.swp");
    }
    for (int i = 0; i < size; i++){
       fsu(kvpairs[i]);
@@ -240,14 +242,14 @@ int NoVoHT::writeFile(){
    sem_wait(&write_lock);
    rewriting = true;
    swapFile = dbfile;
-   dbfile = fopen(".novoht.swp", "w+");
+   dbfile = fopen(".novoht.swp", "w");
    nRem = 0;
    int rc = pthread_create(&writeThread, NULL, rewriteCaller, this);
    if (rc){
       printf("Thread not created");
-      fclose(dbfile);
-      dbfile = swapFile;
-      rewriting = false;
+		fclose(dbfile);
+		dbfile = swapFile;
+		rewriting = false;
    }
    sem_post(&write_lock);
    return rc;
@@ -279,6 +281,7 @@ void NoVoHT::rewriteFile(void *args){
 void NoVoHT::merge(){
    //while(write_lock){}
    //write_lock=true;
+	sem_wait(&map_lock);
    sem_wait(&write_lock);
    char buf[300];
    char sec[300];
@@ -302,7 +305,7 @@ void NoVoHT::merge(){
       else{
          //while (map_lock) {}
          //map_lock = true;
-         sem_wait(&map_lock);
+         //sem_wait(&map_lock);
          fseek(swapFile, 0, SEEK_END);
          string s(buf);
          kvpair* p = kvpairs[hash(s)%size];
@@ -320,15 +323,13 @@ void NoVoHT::merge(){
                p = p->next;
          }
          //map_lock = false;
-         sem_post(&map_lock);
+         //sem_post(&map_lock);
       }
    }
-   FILE *tmp = dbfile;
+	fclose(dbfile);
    dbfile = swapFile;
-   fclose(tmp);
-   remove(".novoht.swp");
    rewriting = false;
-   //write_lock = false;
+	sem_post(&map_lock);
    sem_post(&write_lock);
 }
 
