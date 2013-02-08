@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.69])
+AC_PREREQ([2.59])
 AC_INIT([NoVoHT], [0.2], [kbrandst@hawk.iit.edu])
 AM_INIT_AUTOMAKE([1.10 no-define foreign])
 LT_INIT()
@@ -22,7 +22,8 @@ AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_HEADERS([stddef.h stdlib.h string.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
+#AC_CHECK_HEADER_STDBOOL
+AC_HEADER_STDBOOL
 AC_TYPE_OFF_T
 AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
