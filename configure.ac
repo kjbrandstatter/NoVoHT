@@ -31,15 +31,13 @@ AC_TYPE_UINT8_T
 # Checks for library functions.
 AC_CHECK_FUNCS([ftruncate gettimeofday pow sqrt])
 
-AC_CONFIG_FILES([Makefile src/Makefile])
-AC_ARG_WITH(tests, [--without-tests disable tests])
-if test "$with_tests" == "no"
-then
-	echo Tests Disabled
-	AC_SUBST(subdirs, [src])
-else
-	AC_CONFIG_FILES([tests/Makefile])
-	AC_SUBST(subdirs, [src tests])
-fi
+AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
+#AC_ARG_WITH(tests, [--without-tests disable tests])
+#if test "$with_tests" == "no"
+#then
+#	echo Tests Disabled
+#else
+#fi
+AC_SUBST(sdir, SUBDIRS)
 AC_CONFIG_HEADERS(config.h)
 AC_OUTPUT
