@@ -3,13 +3,14 @@
 
 AC_PREREQ([2.69])
 AC_INIT([NoVoHT], [0.2], [kbrandst@hawk.iit.edu])
-AC_CONFIG_SRCDIR([tests/gpbbench.cxx])
+#AC_CONFIG_SRCDIR([tests/gpbbench.cxx])
 #AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
 
+#check for basic library functions
 AC_CHECK_LIB([c], [printf])
 AC_CHECK_LIB([m], [pow], [])
 AC_CHECK_LIB([pthread], [pthread_create])
@@ -28,5 +29,5 @@ AC_TYPE_UINT8_T
 # Checks for library functions.
 AC_CHECK_FUNCS([ftruncate gettimeofday pow sqrt])
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
