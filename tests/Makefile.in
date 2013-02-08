@@ -1,0 +1,36 @@
+CXX=g++
+CXXFLAGS=-Wall
+LDFLAGS=-pthread
+SRCDIR=../src
+
+.SUFFIXES:
+.SUFFIXES: .cxx .cpp .o
+
+default: genbench
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+
+genbench: genbench.cpp
+	$(CXX) $(SRCDIR)/novoht.o genbench.cpp -I$(SRCDIR) $(LDFLAGS) -o genbench
+
+clean:
+	rm -rf *.o genbench
+
+#pbench: $(TESTDIR)/pbench.cpp
+#	$(CXX) $(SRCDIR)/novoht.o $(TESTDIR)/pbench.cpp -o $(BINDIR)/pbench $(LDFLAGS)
+#
+#fbench: $(OBJECTS) $(TESTDIR)/fbench.cxx
+#	$(CXX) $(SRCDIR)/novoht.o $(TESTDIR)/fbench.cxx -o $(BINDIR)/fbench $(LDFLAGS)
+#
+#gpbbench: $(OBJECTS) $(TESTDIR)/gpbbench.cxx
+#	$(CXX) $(SRCDIR)/novoht.o $(TESTDIR)/gpbbench.cxx -o $(BINDIR)/gpbbench -lz -lstdc++ -lrt -lpthread -lm -lc -lprotobuf -lprotoc meta.pb.cc $(LDFLAGS)
+#
+#genbench: $(OBJECTS) $(TESTDIR)/genbench.cpp
+#	$(CXX) $(SRCDIR)/novoht.o $(TESTDIR)/genbench.cpp -I$(TESTDIR) $(LDFLAGS) -o $(BINDIR)/genbench
+#
+#appendtest: $(OBJECTS) $(TESTDIR)/appendtest.cpp
+#	$(CXX) $(SRCDIR)/novoht.o $(TESTDIR)/appendtest.cpp -o $(BINDIR)/appendtest -lpthread $(LDFLAGS)

@@ -30,4 +30,11 @@ AC_TYPE_UINT8_T
 AC_CHECK_FUNCS([ftruncate gettimeofday pow sqrt])
 
 AC_CONFIG_FILES([Makefile src/Makefile])
+AC_ARG_WITH(tests, [--without-tests disable tests])
+if test "$with_tests" == "no"
+then
+	echo Tests Disabled
+else
+	AC_CONFIG_FILES([tests/Makefile])
+fi
 AC_OUTPUT
