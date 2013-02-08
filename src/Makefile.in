@@ -1,16 +1,19 @@
-CC=g++
-CFLAGS=-Wall
-LDFLAGS=-lpthread
+CXX=@CXX@
+CXXFLAGS=-Wall @CXXFLAGS@
+LDFLAGS=-pthread @LDFLAGS@
+PREFIX=@prefix@
 
 .SUFFIXES:
 .SUFFIXES: .cxx .cpp .o
 
-.cxx.o: $
-	$(CC) $(CFLAGS) -c $< -o $@
+all: libnovoht.so
 
-libnovoht: novoht.cxx novoht.o
-	g++ $(CFLAGS) -c -fPIC -o novoht.obj novoht.cxx $(LDFLAGS)
-	g++ -shared -o libnovoht.so novoht.obj
+.cxx.o:
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+libnovoht.so: novoht.cxx novoht.o
+	$(CXX) $(CXXFLAGS) -c -fPIC -o novoht.obj novoht.cxx $(LDFLAGS)
+	$(CXX) -shared -o libnovoht.so novoht.obj
 	rm novoht.obj
 	ar -cvq libnovoht.a novoht.o
 

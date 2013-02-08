@@ -1,12 +1,12 @@
 CXX=g++
 CXXFLAGS=-Wall
-LDFLAGS=-pthread
 SRCDIR=../src
+LDFLAGS=-pthread -I$(SRCDIR)
 
 .SUFFIXES:
 .SUFFIXES: .cxx .cpp .o
 
-default: genbench
+all: genbench
 
 .cpp.o:
 	$(CXX) -c $(CXXFLAGS) $< -o $@
