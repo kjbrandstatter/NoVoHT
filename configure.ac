@@ -33,12 +33,12 @@ AC_TYPE_UINT8_T
 AC_CHECK_FUNCS([ftruncate gettimeofday pow sqrt])
 
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
-#AC_ARG_WITH(tests, [--without-tests disable tests])
-#if test "$with_tests" == "no"
-#then
-#	echo Tests Disabled
-#else
-#fi
-AC_SUBST(sdir, SUBDIRS)
+AC_ARG_WITH(tests, [--without-tests disable tests])
+if test "$with_tests" == "no"
+then
+	echo Tests Disabled
+else
+	AC_SUBST(testdir, tests)
+fi
 AC_CONFIG_HEADERS(config.h)
 AC_OUTPUT
