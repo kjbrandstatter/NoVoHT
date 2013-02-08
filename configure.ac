@@ -4,6 +4,7 @@
 AC_PREREQ([2.69])
 AC_INIT([NoVoHT], [0.2], [kbrandst@hawk.iit.edu])
 AM_INIT_AUTOMAKE([1.10 no-define foreign])
+LT_INIT()
 #AC_CONFIG_SRCDIR([tests/gpbbench.cxx])
 #AC_CONFIG_HEADERS([config.h])
 

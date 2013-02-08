@@ -23,6 +23,10 @@ clean:
 distclean: clean
 	rm Makefile
 
+install:
+
+uninstall:
+
 #pbench: $(TESTDIR)/pbench.cpp
 #	$(CXX) $(SRCDIR)/novoht.o $(TESTDIR)/pbench.cpp -o $(BINDIR)/pbench $(LDFLAGS)
 #
