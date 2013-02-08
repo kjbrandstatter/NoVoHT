@@ -19,3 +19,6 @@ libnovoht.so: novoht.cxx novoht.o
 
 clean:
 	rm -f *.o *.so *.a
+
+distclean:
+	rm Makefile

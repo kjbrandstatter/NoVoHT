@@ -20,6 +20,9 @@ genbench: genbench.cpp
 clean:
 	rm -rf *.o genbench
 
+distclean: clean
+	rm Makefile
+
 #pbench: $(TESTDIR)/pbench.cpp
 #	$(CXX) $(SRCDIR)/novoht.o $(TESTDIR)/pbench.cpp -o $(BINDIR)/pbench $(LDFLAGS)
 #

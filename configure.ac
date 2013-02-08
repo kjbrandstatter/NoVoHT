@@ -38,4 +38,5 @@ then
 else
 	AC_CONFIG_FILES([tests/Makefile])
 fi
+AC_CONFIG_HEADERS(config.h)
 AC_OUTPUT
