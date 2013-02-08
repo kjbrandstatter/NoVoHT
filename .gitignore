@@ -7,3 +7,4 @@
 *.odt
 bin/*
 *.jpg
+Makefile
