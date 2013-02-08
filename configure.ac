@@ -36,8 +36,10 @@ AC_ARG_WITH(tests, [--without-tests disable tests])
 if test "$with_tests" == "no"
 then
 	echo Tests Disabled
+	AC_SUBST(subdirs, [src])
 else
 	AC_CONFIG_FILES([tests/Makefile])
+	AC_SUBST(subdirs, [src tests])
 fi
 AC_CONFIG_HEADERS(config.h)
 AC_OUTPUT
