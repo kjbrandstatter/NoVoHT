@@ -1,4 +1,15 @@
-run make to compile all benchmark programs
-run make (name) to compile specific benchmark
-run make novoht.o to compile the NoVoHT object file
-run make libnovoht to compile libnovoht.a and libnovoht.so
+NoVoHT is built using autotools so to compile and install
+simply run
+./configure
+make
+make install
+
+link other programs with -lnovoht in the LDFLAGS
+
+NoVoHT is built using libtool for
+compatibility so libtool must be installed.
+
+Alternatively it can be compiled manually
+in the src directory with
+g++ -c -o novoht.o novoht.cxx
+if its not necessary to be dynamically linked.
