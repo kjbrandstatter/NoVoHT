@@ -8,3 +8,12 @@
 bin/*
 *.jpg
 Makefile
+*.m4
+autom4te.cache
+config.*
+configure
+depcomp
+install-sh
+ltmain.sh
+missing
+*.in
