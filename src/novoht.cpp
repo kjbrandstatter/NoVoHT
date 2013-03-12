@@ -70,14 +70,7 @@ void NoVoHT::initialize(const string& fname, const int& initSize,
 
 //0 success, -1 no insert, -2 no write
 int NoVoHT::put(string k, string v) {
-	//while(resizing || map_lock){ /* Wait till done */}
-	//while (map_lock) {}
-	//map_lock = true;
-        //
-        //int semv;
-        //sem_getvalue(&map_lock, &semv);
-        //printf("semv = %d\n", semv);
-        sem_wait(&map_lock);
+   sem_wait(&map_lock);
 	if (numEl >= size * resizeNum) {
 		if (resizeNum != 0) {
 			resize(size * 2);
@@ -90,38 +83,60 @@ int NoVoHT::put(string k, string v) {
 	add->key = k;
 	add->val = v;
 	add->next = NULL;
-        add->positions = NULL;
+   add->positions = NULL;
 	if (cur == NULL) {
+		int rc = write(add);
+		if (rc){
+			delete add;
+			sem_post(&map_lock);
+			return -1;
+		}
 		kvpairs[slot] = add;
 		numEl++;
-		//map_lock = false;
-                sem_post(&map_lock);
-		return write(add);
+      sem_post(&map_lock);
+		return 0;
 	}
 	while (cur->next != NULL) {
 		if (k.compare(cur->key) == 0) {
-			cur->val = v;
-			mark(cur->positions);
 			delete add;
-			//map_lock = false;
-                        sem_post(&map_lock);
-			return write(cur);
+			string oldv = cur->val;
+			cur->val = v;
+			int rc = write(cur);
+			if (rc) {
+				cur->val = oldv;
+				sem_post(&map_lock);
+				return -1;
+			}
+			mark(cur->positions);
+         sem_post(&map_lock);
+			return 0;
 		}
 		cur = cur->next;
 	}
 	if (k.compare(cur->key) == 0) {
-		cur->val = v;
-		mark(cur->positions);
 		delete add;
-		//map_lock = false;
-                sem_post(&map_lock);
-		return write(cur);
+		string oldv = cur->val;
+		cur->val = v;
+		int rc = write(cur);
+		if (rc) {
+			cur->val = oldv;
+			sem_post(&map_lock);
+			return -1;
+		}
+		mark(cur->positions);
+      sem_post(&map_lock);
+		return 0;
+	}
+	int rc = write(add);
+	if (rc){
+		delete add;
+		sem_post(&map_lock);
+		return -1;
 	}
 	cur->next = add;
 	numEl++;
-	//map_lock = false;
-        sem_post(&map_lock);
-	return write(add);
+   sem_post(&map_lock);
+	return 0;
 }
 
 NoVoHT::~NoVoHT(){
@@ -139,9 +154,8 @@ NoVoHT::~NoVoHT(){
 }
 
 string* NoVoHT::get(string k) {
-	//while (map_lock) { /* Wait till done */
-        sem_wait(&map_lock);
-        sem_post(&map_lock);
+   sem_wait(&map_lock);
+   sem_post(&map_lock);
 	int loc = hash(k) % size;
 	kvpair *cur = kvpairs[loc];
 	while (cur != NULL && !k.empty()) {
@@ -152,52 +166,59 @@ string* NoVoHT::get(string k) {
 	return NULL;
 }
 
-//return 0 for success, -1 fail to remove, -2+ write failure
+//return 0 for success, -1 fail to remove, -2 not found
 int NoVoHT::remove(string k){
-   //while(map_lock){ /* Wait till done */}
    sem_wait(&map_lock);
-   int ret =0;
    int loc = hash(k)%size;
    kvpair *cur = kvpairs[loc];
    if (cur == NULL) {
       sem_post(&map_lock);
-      return ret-1;       //not found
+      return -2;       //not found
    }
    if (k.compare(cur->key) ==0) {
-      //fpos_t toRem = kvpairs[loc]->pos;
+		int ret;
       fpos_list * toRem = kvpairs[loc]->positions;
       kvpairs[loc] = cur->next;
       numEl--;
-      ret= rewriting ? logrm(k, toRem) +ret : ret + mark(toRem);
+      ret= rewriting ? logrm(k, toRem) : mark(toRem);
+		if (ret) {
+			sem_post(&map_lock);
+			return -1;
+		}
       delete cur;
       nRem++;
-      if (nRem == magicNumber) ret+=writeFile(); //write and save write success
+      if (nRem == magicNumber) writeFile(); //write and save write success
       sem_post(&map_lock);
-      return ret;
+      return 0;
    }
    while(cur != NULL){
       if (cur->next == NULL){
          sem_post(&map_lock);
-         return ret-1;
+         return -2;
       }
 
       else if (k.compare(cur->next->key)==0){
+			int ret;
          kvpair *r = cur->next;
          cur->next = r->next;
       //   fpos_t toRem = r->pos;
          struct fpos_list * toRem = kvpairs[loc]->positions;
-         ret= rewriting ? logrm(k, toRem) +ret : ret + mark(toRem);
+         ret= rewriting ? logrm(k, toRem) : mark(toRem);
+			if (ret) {
+				sem_post(&map_lock);
+				return -1;
+			}
          delete r;
          numEl--;
          nRem++;
-         if (nRem == magicNumber) ret+=writeFile();              //mark and sace status code
+         if (nRem == magicNumber) writeFile();              //mark and sace status code
          sem_post(&map_lock);
-         return ret;
+         return 0;
       }
       cur = cur->next;
    }
    sem_post(&map_lock);
-   return ret-1;        //not found
+   return -2;        //not found
 }
 
 // Test
@@ -209,9 +230,17 @@ int NoVoHT::append(string k, string aval){
    kvpair* cur = kvpairs[loc];
    while (cur != NULL){
       if (k.compare(cur->key) == 0){
+			int rc;
+			string oldv = cur->val;
          cur->val += ":" + aval;
+			rc = writeAppend(cur,aval);
+			if (rc) {
+				cur->val = oldv;
+				sem_post(&map_lock);
+				return -1;
+			}
          sem_post(&map_lock);
-         return writeAppend(cur, aval) + ret;
+         return 0;
       }
       cur = cur->next;
    }
@@ -220,11 +249,18 @@ int NoVoHT::append(string k, string aval){
    add->val = aval;
    add->next = kvpairs[loc];
    add->positions = NULL;
+	int rc;
+	rc = write(add);
+	if (rc){
+		delete add;
+		sem_post(&map_lock);
+		return -1;
+	}
    kvpairs[loc] = add;
    numEl++;
    //map_lock = false;
    sem_post(&map_lock);
-   return write(add);
+   return 0;
 }
 
 //return 0 if success -2 if failed
