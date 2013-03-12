@@ -377,8 +377,17 @@ int NoVoHT::write(kvpair * p) {
         p->positions = new fpos_list;
         p->positions->next = NULL;
 	fgetpos(dbfile, &(p->positions->pos));
-	fprintf(dbfile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
-        fflush(dbfile);
+	char buffer[250];
+	buffer[0]='\0';
+	strcat(buffer, p->key.c_str());
+	strcat(buffer, "\t");
+	strcat(buffer, p->val.c_str());
+	strcat(buffer, "\t");
+	//sprintf(buffer, "%s\t%s\t", p->key.c_str(), p->val.c_str());
+	
+	::write(fileno(dbfile), buffer, strlen(buffer));
+	//fprintf(dbfile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
+     //   fflush(dbfile);
 	//write_lock = false;
         sem_post(&write_lock);
 	return 0;
