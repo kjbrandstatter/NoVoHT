@@ -25,6 +25,7 @@ class NoVoHTwrapper : public HashMap {
 	NoVoHT *map;
 	public:
 		NoVoHTwrapper(const char*, int);
+      NoVoHTwrapper(const char*, int, int);
 //		NoVoHTwrapper() : HashMap() {}
 		virtual bool put(string, string);
 		virtual string* get(string);
@@ -37,6 +38,10 @@ class NoVoHTwrapper : public HashMap {
 //}
 NoVoHTwrapper::NoVoHTwrapper(const char* fname, int size) : HashMap() {
 	map = new NoVoHT(fname, size, -1);
+}
+
+NoVoHTwrapper::NoVoHTwrapper(const char* fname, int size, int magic) : HashMap() {
+	map = new NoVoHT(fname, size, magic);
 }
 
 bool NoVoHTwrapper::put(string key, string val){
