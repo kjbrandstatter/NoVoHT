@@ -121,7 +121,7 @@ int main(int argc, char *argv[]){
    //NoVoHT map (fn, size, -1);
    //NoVoHT map (fn, size, 100, .7);
 	//NoVoHTwrapper map (fn, size);
-	NoVoHTwrapper basemap (fn, size);
+	NoVoHTwrapper basemap (fn, size, 10000);
 	HashMap * map = &basemap;
    stat(fn, &fstate);
    cout << "Initial file size: " << fstate.st_size << endl << endl;
