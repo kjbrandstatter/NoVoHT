@@ -64,7 +64,7 @@ void NoVoHT::initialize(const string& fname, const int& initSize,
 	dbfile = fopen(filename.c_str(), "r+");
 	if (!dbfile)
 		dbfile = fopen(filename.c_str(), "w+");
-	readFile();
+	//readFile();
 	oldpairs = NULL;
 }
 
@@ -145,7 +145,10 @@ NoVoHT::~NoVoHT(){
       if (writeThread)
          pthread_join(writeThread, NULL);
       fclose(dbfile);
-		remove(".novoht.swp");
+	   //int rmrc = remove(".novoht.mrg");
+      //if (rmrc) {
+        // perror("Error deleting merge file");
+      //}
    }
    for (int i = 0; i < size; i++){
       fsu(kvpairs[i]);
@@ -322,6 +325,7 @@ void NoVoHT::merge(){
    sem_wait(&write_lock);
    char buf[300];
    char sec[300];
+   //fflush(dbfile);
    rewind(dbfile);
    while (readTabString(dbfile,buf) != NULL){
       if(buf[0] == '~'){
