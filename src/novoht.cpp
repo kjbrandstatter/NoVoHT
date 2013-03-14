@@ -137,7 +137,7 @@ int NoVoHT::put(string k, string v) {
 
 NoVoHT::~NoVoHT(){
    if (dbfile){
-      //writeFile();
+      writeFile();
       if (writeThread)
          pthread_join(writeThread, NULL);
       fclose(dbfile);
@@ -197,7 +197,7 @@ int NoVoHT::remove(string k){
          kvpair *r = cur->next;
          cur->next = r->next;
       //   fpos_t toRem = r->pos;
-         struct fpos_list * toRem = kvpairs[loc]->positions;
+         struct fpos_list * toRem = r->positions;
          ret= rewriting ? logrm(k, toRem) : mark(toRem);
 			if (ret) {
 				sem_post(&map_lock);
@@ -208,7 +208,6 @@ int NoVoHT::remove(string k){
          nRem++;
          if (nRem >= magicNumber) writeFile();              //mark and sace status code
          sem_post(&map_lock);
-         cout << k << " - " << toRem->pos.__pos << endl;
          return 0;
       }
       cur = cur->next;
@@ -423,7 +422,6 @@ int NoVoHT::write(kvpair * p) {
 	fgetpos(dbfile, &(p->positions->pos));
 	fprintf(dbfile, "%s\t%s\t", p->key.c_str(), p->val.c_str());
    fflush(dbfile);
-   cout << p->key << "," << p->val << " - " << p->positions->pos.__pos << endl;
 	//write_lock = false;
         sem_post(&write_lock);
 	return 0;
@@ -478,9 +476,8 @@ int NoVoHT::mark(fpos_list * plist) {
 	//write_lock = true;
         sem_wait(&write_lock);
         while (plist != NULL){
-           if (fsetpos(dbfile, &(plist->pos))) cout << "Bigass failure " << endl;
+           fsetpos(dbfile, &(plist->pos));
            fputc((int) '~', dbfile);
-           cout << "Marking " << plist->pos.__pos << endl;
            plist = plist -> next;
         }
         fflush(dbfile);
@@ -506,6 +503,7 @@ char *readTabString(FILE *file, char *buffer) {
 // rewrite this shit
 void NoVoHT::readFile() {
    //if ((dbfile = fopen(".nddovoht.mrg", "r")) == 0){
+   if (filename.empty()) return;
    rename(filename.c_str(), ".novoht.swp");
    dbfile = fopen(filename.c_str(), "w+");
    setvbuf(dbfile,NULL, _IONBF, 0);
@@ -526,22 +524,13 @@ void NoVoHT::readFile() {
    fclose(swapFile);
    if (unlink(".novoht.swp")) perror("Error deleting swap file");
    //FILE * mergeFile;
-   cout << endl;
-   return;
    if ((swapFile = fopen(".novoht.mrg", "r")) != NULL){ // Corrupted close, merging changes
       char buf[300];
       char sec[300];
       while (readTabString(swapFile,buf) != NULL){
          if(buf[0] == '~'){
-            cout << buf << endl;
             remove(buf+1);
             readTabString(swapFile, sec);
- //           char test[300];
-  //          readTabString(swapFile,test);
-   //         if (strcmp(test,(buf+1)) == 0){
-    //           fseek(swapFile, (off_t) atoi(pos), SEEK_SET);
-     //          fputc('~',swapFile);
-      //      }
          }
          else{
             readTabString(swapFile,sec);
