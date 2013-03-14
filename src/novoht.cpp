@@ -141,7 +141,7 @@ int NoVoHT::put(string k, string v) {
 
 NoVoHT::~NoVoHT(){
    if (dbfile){
-      writeFile();
+      //writeFile();
       if (writeThread)
          pthread_join(writeThread, NULL);
       fclose(dbfile);
@@ -278,8 +278,10 @@ int NoVoHT::writeFile(){
    }
    sem_wait(&write_lock);
    rewriting = true;
-   swapFile = dbfile;
-   dbfile = fopen(".novoht.swp", "w");
+   //swapFile = dbfile;
+   fclose(dbfile);
+   swapFile = fopen(".novoht.swp", "w");
+   dbfile = fopen(".novoht.mrg", "w");
    nRem = 0;
    int rc = pthread_create(&writeThread, NULL, rewriteCaller, this);
    if (rc){
@@ -295,8 +297,6 @@ int NoVoHT::writeFile(){
 // Fix
 void NoVoHT::rewriteFile(void *args){
    //write_lock=true;
-   rewind(swapFile);
-   ftruncate(fileno(swapFile), 0);
    for (int i=0; i<size;i++){
       kvpair *cur = kvpairs[i];
       while (cur != NULL){
@@ -364,7 +364,9 @@ void NoVoHT::merge(){
       }
    }
 	fclose(dbfile);
-   dbfile = swapFile;
+   fclose(swapFile);
+   rename(".novoht.swp", filename.c_str());
+   dbfile = fopen(filename.c_str(), "r+");
    rewriting = false;
 	sem_post(&map_lock);
    sem_post(&write_lock);
