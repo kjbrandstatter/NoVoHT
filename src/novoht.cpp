@@ -155,7 +155,7 @@ string* NoVoHT::get(string k) {
 	kvpair *cur = kvpairs[loc];
 	while (cur != NULL && !k.empty()) {
 		if (k.compare(cur->key) == 0)
-			return &(cur->val);
+			return new string((cur->val).c_str());
 		cur = cur->next;
 	}
 	return NULL;
