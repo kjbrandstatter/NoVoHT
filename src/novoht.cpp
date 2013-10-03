@@ -227,7 +227,7 @@ int NoVoHT::append(string k, string aval){
       if (k.compare(cur->key) == 0){
 			int rc;
 			string oldv = cur->val;
-         cur->val += ":" + aval;
+         cur->val += aval;
 			rc = writeAppend(cur,aval);
 			if (rc) {
 				cur->val = oldv;
