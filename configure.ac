@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.59])
-AC_INIT([NoVoHT], [0.4], [kbrandst@hawk.iit.edu])
+AC_INIT([NoVoHT], [0.4.1], [kbrandst@hawk.iit.edu])
 AM_INIT_AUTOMAKE([1.10 no-define foreign])
 LT_INIT()
 #AC_CONFIG_SRCDIR([tests/gpbbench.cxx])
