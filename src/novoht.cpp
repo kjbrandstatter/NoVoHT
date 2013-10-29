@@ -258,6 +258,12 @@ int NoVoHT::append(string k, string aval){
    return 0;
 }
 
+int NoVoHT::writeFileFG() {
+   int ret = writeFile();
+   pthread_join(writeThread, NULL);
+   return ret;
+}
+
 //return 0 if success -2 if failed
 //write hashmap to file
 //// Test
